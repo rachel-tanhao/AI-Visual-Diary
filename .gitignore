@@ -1,0 +1,5 @@
+
+/.venv
+myproject/.env
+/myproject/myproject
+myproject/google-cloud-vision-credential.json

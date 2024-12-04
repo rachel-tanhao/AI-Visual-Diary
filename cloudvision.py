@@ -1,6 +1,6 @@
 #https://console.cloud.google.com/iam-admin/serviceaccounts/details/118058091341323201172/permissions?orgonly=true&project=ninth-bonito-438016-m5&supportedpurview=organizationId
 import os
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/apple/Desktop/cis581 cv/final project/ninth-bonito-438016-m5-f01175447fef.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 # from https://cloud.google.com/vision/docs/handwriting?hl=zh-cn
 def detect_document(path):
