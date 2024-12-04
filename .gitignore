@@ -3,3 +3,6 @@
 myproject/.env
 /myproject/myproject
 myproject/google-cloud-vision-credential.json
+/myproject/image_generator/__pycache__
+**/__pycache__/ 
+

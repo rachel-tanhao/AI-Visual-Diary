@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extracted Text</title>
+</head>
+<body>
+    <h1>Extracted Text from Your Diary</h1>
+    <div class="extracted-text">
+        <p>{{ extracted_text }}</p>
+    </div>
+    <form method="POST" action="{% url 'generate_images' diary_id=diary_id %}">
+        {% csrf_token %}
+        <button type="submit">Generate Images</button>
+    </form>
+    <a href="{% url 'upload_diary' %}">Upload Another Image</a>
+</body>
+</html>
