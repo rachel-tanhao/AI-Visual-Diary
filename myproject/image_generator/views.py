@@ -126,6 +126,7 @@ def select_image(request, generation_id):
     else:
         print("Request method was not POST")
     
+<<<<<<< HEAD
     return redirect('display_generated_images', generation_id=generation_id)
 
 
@@ -298,3 +299,6 @@ def dataset_complete(request, dataset_id):
         'dataset_id': dataset_id,
         'images': images
     })
+=======
+    return redirect('display_generated_images', generation_id=generation_id)
+>>>>>>> main
