@@ -4,16 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Extracted Text</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content-container {
+            display: flex;
+            gap: 30px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .image-container {
+            flex: 1;
+            min-width: 0;
+        }
+        .text-container {
+            flex: 1;
+            min-width: 0;
+        }
+        .original-image {
+            width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+        .extracted-text {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+        .actions {
+            margin-top: 30px;
+            text-align: center;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .button {
+            padding: 12px 30px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .generate-button {
+            background-color: #4CAF50;
+        }
+        .generate-button:hover {
+            background-color: #45a049;
+        }
+        .upload-another {
+            background-color: #2196F3;
+        }
+        .upload-another:hover {
+            background-color: #1976D2;
+        }
+    </style>
 </head>
 <body>
-    <h1>Extracted Text from Your Diary</h1>
-    <div class="extracted-text">
-        <p>{{ extracted_text }}</p>
+    <h1>Your Diary Entry</h1>
+    <div class="content-container">
+        <div class="image-container">
+            <h2>Original Image</h2>
+            <img src="{{ diary_image.url }}" alt="Original Diary" class="original-image">
+        </div>
+        <div class="text-container">
+            <h2>Extracted Text</h2>
+            <div class="extracted-text">
+                {{ extracted_text }}
+            </div>
+        </div>
     </div>
-    <form method="POST" action="{% url 'generate_images' diary_id=diary_id %}">
-        {% csrf_token %}
-        <button type="submit">Generate Images</button>
-    </form>
-    <a href="{% url 'upload_diary' %}">Upload Another Image</a>
+    <div class="actions">
+        <form method="POST" action="{% url 'generate_images' diary_id=diary_id %}">
+            {% csrf_token %}
+            <button type="submit" class="button generate-button">Generate Images</button>
+        </form>
+        <a href="{% url 'upload_diary' %}" class="button upload-another">Upload Another Image</a>
+    </div>
 </body>
 </html>

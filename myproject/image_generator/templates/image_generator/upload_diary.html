@@ -4,14 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Diary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .upload-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .file-input-container {
+            position: relative;
+            width: 300px;
+        }
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .file-input-label:hover {
+            background-color: #45a049;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        button {
+            padding: 12px 30px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1976D2;
+        }
+        #file-name {
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <h1>Upload Your Diary Image</h1>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="diary_image">Select an image:</label>
-        <input type="file" name="diary_image" id="diary_image" required>
-        <button type="submit">Upload</button>
-    </form>
+    <div class="upload-container">
+        <h1>Upload Your Diary Image</h1>
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            <div class="file-input-container">
+                <label for="diary_image" class="file-input-label">Choose Image</label>
+                <input type="file" name="diary_image" id="diary_image" accept="image/*" required>
+                <div id="file-name"></div>
+            </div>
+            <button type="submit">Upload and Extract Text</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('diary_image').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file selected';
+            document.getElementById('file-name').textContent = fileName;
+        });
+    </script>
 </body>
 </html>

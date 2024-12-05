@@ -46,13 +46,22 @@ def detect_document(path):
         )
     return paragraph_text
 
+
 def format_paragraph(words):
     # Join the list of words into a single string with spaces
     paragraph = ''.join(words)
     return paragraph
 
 
-test_doc_path = "./diary_chinese.png.jpg"
-text = detect_document(test_doc_path)
-formatted_paragraph = format_paragraph(text)
-print(formatted_paragraph)
+def parse_diary(image_path):
+    words = detect_document(image_path)
+    extracted_text = format_paragraph(words)
+    return extracted_text
+
+
+
+# for debugging
+# test_doc_path = "./diary_chinese.png.jpg"
+# text = detect_document(test_doc_path)
+# formatted_paragraph = format_paragraph(text)
+# print(formatted_paragraph)

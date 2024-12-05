@@ -5,15 +5,16 @@ Create models to store user data, generated images, and any relevant metadata.
 """
 
 from django.db import models
+from django.contrib.auth.models import User
 
 class UserDiary(models.Model):
-    user = models.CharField(max_length=100)
-    diary_image = models.ImageField(upload_to='diaries/')
-    extracted_text = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)  # Make user optional
+    diary_image = models.ImageField(upload_to='diary_images/')
+    extracted_text = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user}'s Diary, entry created at {self.created_at}"
+        return f"Diary entry {self.id} - {self.created_at}"
 
 class GeneratedImage(models.Model):
     user_diary = models.ForeignKey(UserDiary, on_delete=models.CASCADE)
