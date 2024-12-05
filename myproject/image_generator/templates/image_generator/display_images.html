@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generated Images</title>
     <style>
+<<<<<<< HEAD
+=======
         body {
             font-family: Arial, sans-serif;
             max-width: 1200px;
@@ -14,10 +14,21 @@
         h1, h2 {
             color: #333;
         }
+>>>>>>> main
         .image-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
+<<<<<<< HEAD
+            padding: 20px;
+        }
+        .image-container {
+            position: relative;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+=======
             margin: 20px 0;
         }
         .image-container {
@@ -29,12 +40,33 @@
         }
         .image-container.selected {
             border-color: #4CAF50;
+>>>>>>> main
         }
         .image-container img {
             width: 100%;
             height: auto;
             border-radius: 5px;
         }
+<<<<<<< HEAD
+        .selected {
+            border: 3px solid #4CAF50;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px;
+=======
         .buttons {
             text-align: center;
             margin-top: 20px;
@@ -58,10 +90,16 @@
         .upload-another {
             background-color: #2196F3;
             color: white;
+>>>>>>> main
         }
     </style>
 </head>
 <body>
+<<<<<<< HEAD
+    <h1>Select Your Avatar</h1>
+    <form action="{% url 'image_generator:select_image' generation_id=generation_id %}" method="POST" id="imageForm">
+        {% csrf_token %}
+=======
     <h1>Generated Avatars</h1>
     <h2>Generation ID: {{ generation_id }}</h2>
 
@@ -69,10 +107,20 @@
         {% csrf_token %}
         <input type="hidden" id="selected_image_id" name="image_id" value="">
         
+>>>>>>> main
         <div class="image-grid">
             {% for image in images %}
             <div class="image-container" onclick="selectImage(this, '{{ image.id }}')">
                 <img src="{{ image.url }}" alt="Generated image {{ forloop.counter }}">
+<<<<<<< HEAD
+            </div>
+            {% endfor %}
+        </div>
+        <input type="hidden" name="image_id" id="selectedImage">
+        <div class="controls">
+            <button type="submit" class="button">Use Selected Image</button>
+            <a href="{% url 'image_generator:home' %}" class="button">Generate New Images</a>
+=======
                 <div style="display: none;">Image ID: {{ image.id }}</div>
             </div>
             {% endfor %}
@@ -85,13 +133,17 @@
             <a href="{% url 'upload_diary' %}" class="button upload-another">
                 Upload another diary
             </a>
+>>>>>>> main
         </div>
     </form>
 
     <script>
         function selectImage(container, imageId) {
+<<<<<<< HEAD
+=======
             console.log('Selected image ID:', imageId);
             
+>>>>>>> main
             // Remove selection from all containers
             document.querySelectorAll('.image-container').forEach(cont => {
                 cont.classList.remove('selected');
@@ -100,11 +152,16 @@
             // Add selection to clicked container
             container.classList.add('selected');
             
+<<<<<<< HEAD
+            // Update hidden input
+            document.getElementById('selectedImage').value = imageId;
+=======
             // Update hidden input with selected image ID
             document.getElementById('selected_image_id').value = imageId;
             
             // Enable confirm button
             document.getElementById('confirmButton').disabled = false;
+>>>>>>> main
         }
     </script>
 </body>
