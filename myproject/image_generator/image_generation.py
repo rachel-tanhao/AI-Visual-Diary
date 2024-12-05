@@ -41,6 +41,7 @@ def generate(prompt, num_images):
     return generation_id
 
 
+
 def get_generated_image_ids(generation_id):
     """ Function to retrieve generated image IDs without displaying them """
     url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
@@ -59,23 +60,6 @@ def get_generated_image_ids(generation_id):
         image_ids.append(image_id)
     return image_ids
 
-
-def wait_for_image_generation(generation_id):
-    """Poll the API to check the status of image generation."""
-    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
-    headers = {
-        "accept": "application/json",
-        "authorization": authorization
-    }
-    while True:
-        response = requests.get(url, headers=headers, timeout=30)
-        response_dict = json.loads(response.text)
-        status = response_dict.get("sdGenerationJob", {}).get("status")
-        if status == "COMPLETE":
-            return response_dict
-        elif status == "FAILED":
-            raise Exception("Image generation failed.")
-        time.sleep(5)  # Wait before polling again
 
 
 def display_images(generation_id):
@@ -126,6 +110,7 @@ def upload_image_to_dataset(dataset_id, generated_image_id):
     response = requests.post(url, json=payload, headers=headers, timeout=30)
     return response.status_code == 200
 
+
 def create_user_dataset(dataset_name, seed_image_id, describe_user):
     """Create a new dataset for the user based on a seed image."""
     url = "https://cloud.leonardo.ai/api/rest/v1/datasets"
@@ -144,6 +129,7 @@ def create_user_dataset(dataset_name, seed_image_id, describe_user):
         return response.json().get("datasetId")
     return None
 
+
 def train_user_model(user_model_name, dataset_id):
     """Train a custom model using the specified dataset."""
     url = "https://cloud.leonardo.ai/api/rest/v1/models"
@@ -161,3 +147,23 @@ def train_user_model(user_model_name, dataset_id):
     if response.status_code == 200:
         return response.json().get("sdTrainingJob", {}).get("customModelId")
     return None
+
+
+
+def wait_for_image_generation(generation_id):
+    """Poll the API to check the status of image generation."""
+    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
+    headers = {
+        "accept": "application/json",
+        "authorization": authorization
+    }
+    while True:
+        response = requests.get(url, headers=headers, timeout=30)
+        response_dict = json.loads(response.text)
+        status = response_dict.get("sdGenerationJob", {}).get("status")
+        if status == "COMPLETE":
+            return response_dict
+        elif status == "FAILED":
+            raise Exception("Image generation failed.")
+        time.sleep(5)  # Wait before polling again
+

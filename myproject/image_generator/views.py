@@ -82,3 +82,28 @@ def display_generated_images(request, generation_id):
         'images': images,
     }
     return render(request, 'image_generator/display_images.html', context)
+
+
+def select_image(request, generation_id):
+    if request.method == 'POST':
+        # Debug print all POST data
+        print("POST data:", request.POST)
+        
+        selected_image_id = request.POST.get('image_id')
+        print("Raw selected_image_id:", selected_image_id)
+        
+        if selected_image_id:
+            request.session['selected_image_id'] = selected_image_id
+            print(f"Stored image ID in session: {selected_image_id}")
+            
+            # Instead of redirecting to home, let's show a success page
+            return render(request, 'image_generator/selection_success.html', {
+                'selected_image_id': selected_image_id,
+                'generation_id': generation_id
+            })
+        else:
+            print("No image_id found in POST data")
+    else:
+        print("Request method was not POST")
+    
+    return redirect('display_generated_images', generation_id=generation_id)
