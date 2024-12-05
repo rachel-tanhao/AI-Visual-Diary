@@ -93,11 +93,11 @@
         </div>
     </div>
     <div class="actions">
-        <form method="POST" action="{% url 'generate_images' diary_id=diary_id %}">
+        <form method="POST" action="{% url 'image_generator:generate_images' diary_id=diary_id %}">
             {% csrf_token %}
             <button type="submit" class="button generate-button">Generate Images</button>
         </form>
-        <a href="{% url 'upload_diary' %}" class="button upload-another">Upload Another Image</a>
+        <a href="{% url 'image_generator:upload_diary' %}" class="button upload-another">Upload Another Image</a>
     </div>
 </body>
 </html>
