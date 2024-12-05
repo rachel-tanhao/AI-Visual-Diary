@@ -4,17 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generated Images</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .image-container {
+            position: relative;
+            cursor: pointer;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .image-container.selected {
+            border-color: #4CAF50;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .confirm-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .confirm-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .upload-another {
+            background-color: #2196F3;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <h1>Generated Images</h1>
+    <h1>Generated Avatars</h1>
     <h2>Generation ID: {{ generation_id }}</h2>
-    <div>
-        {% for image in images %}
-            <img src="{{ image.url }}" alt="Generated Image" style="max-width: 300px; margin: 10px;">
-        {% empty %}
-            <p>No images generated.</p>
-        {% endfor %}
-    </div>
-    <a href="{% url 'upload_diary' %}">Upload another diary</a>
+
+    <form id="selectImageForm" method="POST" action="{% url 'select_image' generation_id=generation_id %}">
+        {% csrf_token %}
+        <input type="hidden" id="selected_image_id" name="image_id" value="">
+        
+        <div class="image-grid">
+            {% for image in images %}
+            <div class="image-container" onclick="selectImage(this, '{{ image.id }}')">
+                <img src="{{ image.url }}" alt="Generated image {{ forloop.counter }}">
+                <div style="display: none;">Image ID: {{ image.id }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="buttons">
+            <button type="submit" class="confirm-button" id="confirmButton" disabled>
+                Confirm Selection
+            </button>
+            <a href="{% url 'upload_diary' %}" class="button upload-another">
+                Upload another diary
+            </a>
+        </div>
+    </form>
+
+    <script>
+        function selectImage(container, imageId) {
+            console.log('Selected image ID:', imageId);
+            
+            // Remove selection from all containers
+            document.querySelectorAll('.image-container').forEach(cont => {
+                cont.classList.remove('selected');
+            });
+            
+            // Add selection to clicked container
+            container.classList.add('selected');
+            
+            // Update hidden input with selected image ID
+            document.getElementById('selected_image_id').value = imageId;
+            
+            // Enable confirm button
+            document.getElementById('confirmButton').disabled = false;
+        }
+    </script>
 </body>
 </html>
