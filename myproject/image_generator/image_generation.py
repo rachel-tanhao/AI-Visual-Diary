@@ -2,15 +2,21 @@ import requests
 import json
 import time
 import os
+from django.conf import settings
 
 leonardo_api_key = os.getenv("LEONARDO_API_KEY")
 authorization = "Bearer %s" % leonardo_api_key
+
+
+
+
 
 def formatJsonResponse(response):
     """Convert JSON response to a formatted string."""
     response_dict = json.loads(response.text)
     formatted_response = json.dumps(response_dict, indent=4)
     return formatted_response
+
 
 def generate(prompt, num_images):
     """Generate images based on a prompt using the Leonardo AI API."""
@@ -34,16 +40,25 @@ def generate(prompt, num_images):
     generation_id = response_dict.get("sdGenerationJob", {}).get("generationId")
     return generation_id
 
+
 def get_generated_image_ids(generation_id):
-    """Fetch generated images using the generation ID."""
-    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}/images"
+    """ Function to retrieve generated image IDs without displaying them """
+    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
     headers = {
         "accept": "application/json",
         "authorization": authorization
     }
-    response = requests.get(url, headers=headers, timeout=30)
-    response_dict = json.loads(response.text)
-    return response_dict.get("images", [])
+    # Fetch the generated images
+    response = requests.get(url, headers=headers)
+    response_dict = response.json()
+    # Get the generated image IDs
+    generated_images = response_dict.get('generations_by_pk', {}).get('generated_images', [])
+    image_ids = []
+    for image_data in generated_images:
+        image_id = image_data['id']
+        image_ids.append(image_id)
+    return image_ids
+
 
 def wait_for_image_generation(generation_id):
     """Poll the API to check the status of image generation."""
@@ -62,11 +77,40 @@ def wait_for_image_generation(generation_id):
             raise Exception("Image generation failed.")
         time.sleep(5)  # Wait before polling again
 
+
 def display_images(generation_id):
-    """Display generated images based on generation ID."""
-    images = get_generated_image_ids(generation_id)
-    for image in images:
-        print(f"Image URL: {image['url']}")  # Replace with your display logic
+    """Fetch generated images and return their data"""
+    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
+    headers = {
+        "accept": "application/json",
+        "authorization": authorization
+    }
+    
+    # Poll for image generation completion (with timeout)
+    max_attempts = 12  # 1 minute maximum wait
+    for _ in range(max_attempts):
+        response = requests.get(url, headers=headers)
+        response_dict = json.loads(response.text)
+        
+        status = response_dict.get('generations_by_pk', {}).get('status', '')
+        if status == "COMPLETE":
+            # Get generated images
+            generated_images = response_dict.get('generations_by_pk', {}).get('generated_images', [])
+            # Return list of image data with URLs and IDs
+            return [
+                {
+                    'url': image_data['url'],
+                    'id': image_data['id']
+                }
+                for image_data in generated_images
+            ]
+        elif status == "FAILED":
+            return []
+            
+        time.sleep(5)  # Wait before checking again
+    
+    return []  # Return empty list if timeout
+
 
 def upload_image_to_dataset(dataset_id, generated_image_id):
     """Upload a generated image to a specified dataset."""
