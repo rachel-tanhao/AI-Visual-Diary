@@ -7,6 +7,8 @@ myproject/google-cloud-vision-credential.json
 
 # igonore any pycache directoyry
 **/__pycache__/ 
+__pycache__/
+
 
 /myproject/image_generator/migrations/__pycache__
 
