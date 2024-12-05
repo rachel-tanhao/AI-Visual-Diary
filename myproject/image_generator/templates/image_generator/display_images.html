@@ -2,20 +2,6 @@
 <html>
 <head>
     <title>Generated Images</title>
-<<<<<<< Updated upstream
-</head>
-<body>
-    <h1>Generated Images</h1>
-    <h2>Generation ID: {{ generation_id }}</h2>
-    <div>
-        {% for image in images %}
-            <img src="{{ image.url }}" alt="Generated Image" style="max-width: 300px; margin: 10px;">
-        {% empty %}
-            <p>No images generated.</p>
-        {% endfor %}
-    </div>
-    <a href="{% url 'upload_diary' %}">Upload another diary</a>
-=======
     <style>
         .image-grid {
             display: grid;
@@ -88,6 +74,5 @@
             document.getElementById('selectedImage').value = imageId;
         }
     </script>
->>>>>>> Stashed changes
 </body>
 </html>

@@ -101,9 +101,6 @@ def display_generated_images(request, generation_id):
         'generation_id': generation_id,
         'images': images,
     }
-<<<<<<< Updated upstream
-    return render(request, 'image_generator/display_images.html', context)
-=======
     return render(request, 'image_generator/display_images.html', context)
 
 
@@ -174,14 +171,27 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
         
         if not dataset_id:
             print("Failed to create dataset")  # Debug log
-            session['dataset_progress']['status'] = 'failed'
-            session['dataset_progress']['logs'].append("Failed to create dataset")
+            # Initialize the progress dictionary if it doesn't exist
+            if 'dataset_progress' not in session:
+                session['dataset_progress'] = {}
+            session['dataset_progress'].update({
+                'status': 'failed',
+                'logs': ['Failed to create dataset']
+            })
             session.save()
             return
-        
-        session['dataset_progress']['dataset_id'] = dataset_id
-        session['dataset_progress']['status'] = 'in_progress'
-        session['dataset_progress']['logs'].append(f"Dataset created with ID: {dataset_id}")
+
+        # Initialize or update the progress dictionary
+        progress_data = session.get('dataset_progress', {})
+        progress_data.update({
+            'dataset_id': dataset_id,
+            'status': 'in_progress',
+            'current_activity': '',
+            'completed_activities': 0,
+            'total_activities': 9,
+            'logs': [f"Dataset created with ID: {dataset_id}"]
+        })
+        session['dataset_progress'] = progress_data
         session.save()
         
         activities = [
@@ -194,11 +204,13 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
             try:
                 print(f"Processing activity: {activity}")  # Debug log
                 
-                session['dataset_progress'].update({
+                progress_data = session.get('dataset_progress', {})
+                progress_data.update({
                     'current_activity': activity,
                     'completed_activities': idx,
-                    'logs': session['dataset_progress']['logs'] + [f"Starting generation for: {activity}"]
+                    'logs': progress_data.get('logs', []) + [f"Starting generation for: {activity}"]
                 })
+                session['dataset_progress'] = progress_data
                 session.save()
                 
                 # Generate image for activity
@@ -235,19 +247,28 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
                     session.save()
                 
             except Exception as e:
-                print(f"Error processing activity {activity}: {str(e)}")  # Debug log
-                session['dataset_progress']['logs'].append(f"Error: {str(e)}")
+                print(f"Error processing activity {activity}: {str(e)}")
+                progress_data = session.get('dataset_progress', {})
+                progress_data.update({
+                    'status': 'error',
+                    'logs': progress_data.get('logs', []) + [f"Error: {str(e)}"]
+                })
+                session['dataset_progress'] = progress_data
                 session.save()
-        
+                
         session['dataset_progress']['status'] = 'complete'
         session['dataset_progress']['logs'].append("Dataset creation completed")
         session.save()
         print("Dataset creation completed successfully")  # Debug log
         
     except Exception as e:
-        print(f"Critical error in background task: {str(e)}")  # Debug log
-        session['dataset_progress']['status'] = 'failed'
-        session['dataset_progress']['logs'].append(f"Critical error: {str(e)}")
+        print(f"Critical error in background task: {str(e)}")
+        progress_data = session.get('dataset_progress', {})
+        progress_data.update({
+            'status': 'failed',
+            'logs': progress_data.get('logs', []) + [f"Critical error: {str(e)}"]
+        })
+        session['dataset_progress'] = progress_data
         session.save()
 
 
@@ -277,4 +298,3 @@ def dataset_complete(request, dataset_id):
         'dataset_id': dataset_id,
         'images': images
     })
->>>>>>> Stashed changes

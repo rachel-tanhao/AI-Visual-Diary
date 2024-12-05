@@ -54,27 +54,6 @@ def get_generated_image_ids(generation_id):
     return image_ids
 
 
-<<<<<<< Updated upstream
-def wait_for_image_generation(generation_id):
-    """Poll the API to check the status of image generation."""
-    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
-    headers = {
-        "accept": "application/json",
-        "authorization": authorization
-    }
-    while True:
-        response = requests.get(url, headers=headers, timeout=30)
-        response_dict = json.loads(response.text)
-        status = response_dict.get("sdGenerationJob", {}).get("status")
-        if status == "COMPLETE":
-            return response_dict
-        elif status == "FAILED":
-            raise Exception("Image generation failed.")
-        time.sleep(5)  # Wait before polling again
-
-
-=======
->>>>>>> Stashed changes
 def display_images(generation_id):
     """Fetch generated images and return their data"""
     url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
@@ -228,33 +207,37 @@ def create_user_dataset(dataset_name, seed_image_id, describe_user):
 
 def upload_image_to_dataset(dataset_id, generated_image_id):
     """Upload a generated image to a specified dataset."""
-    url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}/images"
+    url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}/upload/gen"
+    
     payload = {
-        "imageId": generated_image_id
+        "generatedImageId": generated_image_id  # Changed from imageId to generatedImageId
     }
+    
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
         "authorization": authorization
     }
-    response = requests.post(url, json=payload, headers=headers, timeout=30)
-    return response.status_code == 200
+    
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        print(f"Upload response for image {generated_image_id}: {response.text}")  # Debug log
+        
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"Failed to upload image. Status code: {response.status_code}")
+            print(f"Error message: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"Error uploading image: {str(e)}")
+        return False
 
-<<<<<<< Updated upstream
-def create_user_dataset(dataset_name, seed_image_id, describe_user):
-    """Create a new dataset for the user based on a seed image."""
-    url = "https://cloud.leonardo.ai/api/rest/v1/datasets"
-    payload = {
-        "name": dataset_name,
-        "description": describe_user,
-        "seedImageId": seed_image_id
-    }
-=======
 
 def display_all_images_in_dataset(dataset_id):
     """Get all images from a dataset."""
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}"
->>>>>>> Stashed changes
     headers = {
         "accept": "application/json",
         "authorization": authorization
@@ -311,9 +294,6 @@ def train_user_model(user_model_name, dataset_id):
     response = requests.post(url, json=payload, headers=headers, timeout=30)
     if response.status_code == 200:
         return response.json().get("sdTrainingJob", {}).get("customModelId")
-<<<<<<< Updated upstream
-    return None
-=======
     return None
 
 
@@ -390,4 +370,3 @@ def wait_for_image_generation(generation_id):
 
 
 
->>>>>>> Stashed changes
