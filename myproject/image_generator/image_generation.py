@@ -239,7 +239,7 @@ def upload_image_to_dataset(dataset_id, generated_image_id):
 
 
 def display_all_images_in_dataset(dataset_id):
-    """Display all images in a dataset."""
+    """Display all images in a dataset with their activities."""
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}"
     
     headers = {
@@ -247,41 +247,54 @@ def display_all_images_in_dataset(dataset_id):
         "authorization": authorization
     }
     
+    # Default activities list (in order)
+    activities = [
+        "playing basketball", "riding a bicycle", "reading a book",
+        "playing the piano", "cooking in the kitchen", "flying a kite",
+        "playing tennis", "swimming in a pool", "watering flowers"
+    ]
+    
     try:
         response = requests.get(url, headers=headers)
-        logger.info(f"Raw dataset response: {response.text}")  # Add this line for debugging
+        logger.info(f"Raw API Response: {response.text}")  # Debug log 1
         
         if response.status_code == 200:
-            dataset = response.json()
-            # The response structure might be different, let's handle both possible paths
-            images = (
-                dataset.get('datasets_by_pk', {}).get('dataset_images', []) or
-                dataset.get('dataset_images', [])
-            )
+            dataset = response.json().get('datasets_by_pk', {})
+            images = dataset.get('dataset_images', [])
+            logger.info(f"Images from API: {images}")  # Debug log 2
             
-            image_urls = []
-            for image in images:
-                # Try different paths to find the URL
-                url = (
-                    image.get('url') or
-                    image.get('image', {}).get('url') or
-                    image.get('generated_image', {}).get('url')
-                )
-                if url:
-                    image_urls.append({
-                        'url': url,
-                        'id': image.get('id') or image.get('image', {}).get('id')
-                    })
-            
-            logger.info(f"Found {len(image_urls)} images in dataset")
-            return image_urls
-            
-        logger.error(f"Failed to get dataset. Status: {response.status_code}")
-        return []
+            if images:
+                image_data = []
+                for idx, image in enumerate(images):
+                    logger.info(f"Processing image: {image}")  # Debug log 3
+                    # Try different paths to get the URL
+                    url = (
+                        image.get('image', {}).get('url') or
+                        image.get('generated_image', {}).get('url') or
+                        image.get('url')
+                    )
+                    if url:
+                        activity = activities[idx] if idx < len(activities) else "Additional activity"
+                        image_data.append({
+                            'url': url,
+                            'id': image.get('id') or image.get('image', {}).get('id'),
+                            'activity': activity
+                        })
+                        logger.info(f"Added image data: {image_data[-1]}")  # Debug log 4
+                
+                logger.info(f"Final image data: {image_data}")  # Debug log 5
+                return image_data
+            else:
+                logger.warning("No images found in dataset response")
+                return []
+        else:
+            logger.error(f"Failed to get dataset. Status code: {response.status_code}")
+            return []
             
     except Exception as e:
         logger.error(f"Error displaying dataset images: {str(e)}")
         return []
+
 ################ model related functions ##################
 
 # def train_user_model(user_model_name, dataset_id):
