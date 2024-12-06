@@ -173,7 +173,7 @@ def create_user_dataset(dataset_name, seed_image_id, describe_user):
     generated_images = []
     for activity in activities:
         logger.info(f"Generating image for activity: {activity}")
-        prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation."
+        prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation, bright color."
         
         generation_id = generate_with_image_id(seed_image_id, prompt, 1)
         if generation_id:
@@ -297,40 +297,23 @@ def display_all_images_in_dataset(dataset_id):
 
 ################ model related functions ##################
 
-# def train_user_model(user_model_name, dataset_id):
-#     """Train a custom model using the specified dataset."""
-#     url = "https://cloud.leonardo.ai/api/rest/v1/models"
-#     headers = {
-#         "accept": "application/json",
-#         "content-type": "application/json",
-#         "authorization": authorization
-#     }
-#     payload = {
-#         "modelType": "CHARACTERS",
-#         "datasetId": dataset_id,
-#         "name": user_model_name
-#     }
-#     response = requests.post(url, json=payload, headers=headers, timeout=30)
-#     if response.status_code == 200:
-#         return response.json().get("sdTrainingJob", {}).get("customModelId")
-#     return None
 
-def train_custom_model(dataset_id, user_name):
+def train_custom_model(dataset_id, describe_user):
     """Train a custom model using the specified dataset."""
     url = "https://cloud.leonardo.ai/api/rest/v1/models"
     
-    # Create a model name using username and timestamp
-    model_name = f"custom_model_{user_name}_{int(time.time())}"
+    model_name = f"custom_model_{describe_user}_{int(time.time())}"
+    instance_prompt = f"3D Pixar-style animation of {describe_user}."
     
     payload = {
         "name": model_name,
-        "description": f"Custom model trained for user {user_name}",
+        "description": f"Custom model trained for {describe_user}",
         "datasetId": dataset_id,
-        "modelType": "CHARACTERS",  # Since we're training character models
-        "instance_prompt": f"a {user_name} character",  # This helps identify the subject
+        "modelType": "CHARACTERS",
+        "instance_prompt": instance_prompt,
         "nsfw": False,
-        "resolution": 768,  # Higher resolution for better quality
-        "sd_Version": "v2"  # Using SD 2.1 for better results
+        "resolution": 768,
+        "sd_version": "v2"
     }
     
     headers = {
@@ -339,22 +322,37 @@ def train_custom_model(dataset_id, user_name):
         "authorization": authorization
     }
     
-    logger.info(f"Starting model training for user {user_name} with dataset {dataset_id}")
-    logger.info(f"Training payload: {json.dumps(payload, indent=2)}")
+    logger.info(f"Starting model training with payload: {json.dumps(payload, indent=2)}")
     
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
-        logger.info(f"Training response: {response.text}")
+        response = requests.post(url, json=payload, headers=headers)
+        logger.info(f"Training response status code: {response.status_code}")
+        logger.info(f"Training response body: {response.text}")
         
         if response.status_code == 200:
-            model_id = response.json().get("sdTrainingJob", {}).get("customModelId")
-            logger.info(f"Model training started. Model ID: {model_id}")
-            return model_id
+            response_data = response.json()
+            training_job = response_data.get('sdTrainingJob', {})
+            model_id = training_job.get('customModelId')
+            training_id = training_job.get('id')
+            
+            if model_id:
+                logger.info(f"Successfully extracted model ID: {model_id}")
+                return {
+                    'model_id': model_id,
+                    'training_id': training_id
+                }
+            else:
+                logger.error("No model ID found in response")
+                logger.error(f"Full response: {json.dumps(response_data, indent=2)}")
+                return None
+                
         else:
-            logger.error(f"Failed to start model training. Status: {response.status_code}")
+            logger.error(f"Failed to start training. Response: {response.text}")
             return None
+            
     except Exception as e:
-        logger.error(f"Error during model training: {str(e)}")
+        logger.error(f"Exception during model training: {str(e)}")
+        logger.exception("Full traceback:")
         return None
 
 
@@ -377,6 +375,37 @@ def get_model_status(model_id):
         return None
     except Exception as e:
         logger.error(f"Error checking model status: {str(e)}")
+        return None
+
+
+def generate_with_custom_model(model_id, prompt, num_images=1):
+    """Generate images using a custom trained model."""
+    url = "https://cloud.leonardo.ai/api/rest/v1/generations"
+    
+    payload = {
+        "prompt": prompt,
+        "modelId": model_id,
+        "num_images": num_images,
+        "width": 768,
+        "height": 768,
+        "presetStyle": "DYNAMIC",
+        "public": False
+    }
+    
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": authorization
+    }
+    
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code == 200:
+            generation_id = response.json().get('sdGenerationJob', {}).get('generationId')
+            return generation_id
+        return None
+    except Exception as e:
+        logger.error(f"Error generating with custom model: {str(e)}")
         return None
 
 ################ utils ##################

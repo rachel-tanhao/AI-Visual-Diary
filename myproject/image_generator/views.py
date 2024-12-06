@@ -17,7 +17,8 @@ from .image_generation import (
     get_number_of_images_in_dataset,
     display_all_images_in_dataset,
     train_custom_model,
-    get_model_status
+    get_model_status,
+    generate_with_custom_model
 )
 import requests
 import os
@@ -205,59 +206,99 @@ def generate_images(request, diary_id):
 
 
 def train_model_view(request, dataset_id):
-    """View to handle model training initiation."""
-    if request.method == 'POST':
-        # For now, use the username as identifier
-        user_name = request.user.username if request.user.is_authenticated else 'anonymous'
+    """View to handle model training."""
+    try:
+        # Get describe_user from session or use default
+        describe_user = request.session.get('describe_user', 'anonymous')
         
-        try:
-            # Start model training
-            model_id = train_custom_model(dataset_id, user_name)
-            
-            if model_id:
-                # Store model ID in session for tracking
-                request.session['training_model_id'] = model_id
-                
-                messages.success(request, "Model training has started successfully!")
-                return JsonResponse({
-                    'status': 'success',
-                    'model_id': model_id,
-                    'message': 'Model training initiated successfully'
-                })
-            else:
-                messages.error(request, "Failed to start model training.")
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Failed to start model training'
-                })
-                
-        except Exception as e:
-            logger.error(f"Error in model training: {str(e)}")
-            messages.error(request, "An error occurred during model training.")
+        logger.info(f"Starting model training for dataset: {dataset_id}")
+        training_info = train_custom_model(dataset_id, describe_user)
+        
+        if training_info:
+            logger.info(f"Model training started. Info: {training_info}")
+            return JsonResponse({
+                'status': 'success',
+                'model_id': training_info['model_id']
+            })
+        else:
+            logger.error("Failed to start model training")
             return JsonResponse({
                 'status': 'error',
-                'message': str(e)
+                'message': 'Failed to start model training'
             })
-    
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Invalid request method'
-    })
+            
+    except Exception as e:
+        logger.error(f"Error in train_model_view: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+
+
+def view_trained_model(request, model_id):
+    """View to display trained model details."""
+    try:
+        logger.info(f"Fetching details for model: {model_id}")
+        url = f"https://cloud.leonardo.ai/api/rest/v1/models/{model_id}"
+        
+        headers = {
+            "accept": "application/json",
+            "authorization": f"Bearer {os.getenv('LEONARDO_API_KEY')}"
+        }
+        
+        response = requests.get(url, headers=headers)
+        logger.info(f"Model API response: {response.text}")
+        
+        if response.status_code == 200:
+            model_data = response.json().get('custom_models_by_pk', {})
+            
+            context = {
+                'model': {
+                    'id': model_id,
+                    'name': model_data.get('name'),
+                    'status': model_data.get('status'),
+                    'created_at': model_data.get('createdAt'),
+                    'preview_image_url': model_data.get('previewImageUrl'),
+                    'description': model_data.get('description'),
+                    'instance_prompt': model_data.get('instancePrompt')
+                }
+            }
+            
+            return render(request, 'image_generator/trained_model.html', context)
+        else:
+            messages.error(request, "Failed to retrieve model details")
+            logger.error(f"Failed to retrieve model. Status: {response.status_code}")
+            return redirect('image_generator:home')
+            
+    except Exception as e:
+        logger.error(f"Error retrieving model details: {str(e)}")
+        messages.error(request, f"Error: {str(e)}")
+        return redirect('image_generator:home')
+
+
+
+
 
 def check_model_status_view(request, model_id):
-    """View to check the status of model training."""
-    status = get_model_status(model_id)
-    
-    if status:
+    """View to check model training status."""
+    try:
+        logger.info(f"Checking status for model ID: {model_id}")
+        status = get_model_status(model_id)
+        logger.info(f"Retrieved status: {status}")
+        
         return JsonResponse({
             'status': 'success',
-            'training_status': status
+            'training_status': status,
+            'model_id': model_id
         })
-    
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Failed to get model status'
-    })
+            
+    except Exception as e:
+        logger.error(f"Error checking model status: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
 
 
 ########## utils ##############
@@ -406,6 +447,26 @@ def dataset_complete(request, dataset_id):
         'images': images
     })
 
+
+def generate_with_model(request, model_id):
+    """Generate images using a trained model."""
+    if request.method == 'POST':
+        prompt = request.POST.get('prompt')
+        if prompt:
+            try:
+                generation_id = generate_with_custom_model(model_id, prompt)
+                if generation_id:
+                    messages.success(request, "Image generation started successfully!")
+                    return redirect('image_generator:display_generated_images', generation_id=generation_id)
+                else:
+                    messages.error(request, "Failed to generate image")
+            except Exception as e:
+                logger.error(f"Error generating image: {str(e)}")
+                messages.error(request, f"Error generating image: {str(e)}")
+        else:
+            messages.error(request, "Prompt is required")
+    
+    return redirect('image_generator:view_trained_model', model_id=model_id)
 
 
 
