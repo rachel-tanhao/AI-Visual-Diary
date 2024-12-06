@@ -1,0 +1,74 @@
+{% extends 'image_generator/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Trained Model Details</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Model ID:</strong></div>
+                <div class="col-md-9">{{ model.id }}</div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Name:</strong></div>
+                <div class="col-md-9">{{ model.name }}</div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Status:</strong></div>
+                <div class="col-md-9">
+                    <span class="badge bg-{% if model.status == 'COMPLETE' %}success{% elif model.status == 'FAILED' %}danger{% else %}warning{% endif %}">
+                        {{ model.status }}
+                    </span>
+                </div>
+            </div>
+            
+            {% if model.instance_prompt %}
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Instance Prompt:</strong></div>
+                <div class="col-md-9">{{ model.instance_prompt }}</div>
+            </div>
+            {% endif %}
+            
+            {% if model.description %}
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Description:</strong></div>
+                <div class="col-md-9">{{ model.description }}</div>
+            </div>
+            {% endif %}
+            
+            {% if model.created_at %}
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Created At:</strong></div>
+                <div class="col-md-9">{{ model.created_at }}</div>
+            </div>
+            {% endif %}
+            
+            {% if model.preview_image_url %}
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Preview Image:</strong></div>
+                <div class="col-md-9">
+                    <img src="{{ model.preview_image_url }}" alt="Model Preview" class="img-fluid rounded">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if model.status == 'COMPLETE' %}
+    <div class="mt-4">
+        <h3>Generate Images with this Model</h3>
+        <form method="post" action="{% url 'image_generator:generate_with_model' model.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="prompt" class="form-label">Prompt</label>
+                <textarea class="form-control" id="prompt" name="prompt" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate Image</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

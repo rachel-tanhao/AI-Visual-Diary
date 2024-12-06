@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dataset Created</title>
+    <style>
+        .dataset-info {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .activity-card {
+            border: 1px solid #eee;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="dataset-info">
+        <h2>Dataset Created Successfully!</h2>
+        <p>Dataset ID: {{ dataset_id }}</p>
+        <p>Total Images Generated: {{ total_images }}</p>
+    </div>
+    
+    <div class="image-grid">
+        {% for image in generated_images %}
+        <div class="activity-card">
+            <h3>{{ image.activity }}</h3>
+            <p>Image ID: {{ image.image_id }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div style="text-align: center; margin: 20px;">
+        <a href="{% url 'home' %}" class="button">Return to Home</a>
+    </div>
+</body>
+</html>

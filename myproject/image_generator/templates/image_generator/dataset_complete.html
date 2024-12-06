@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dataset Creation Complete!</title>
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .image-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        .image-info {
+            padding: 15px;
+        }
+        .activity-label {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .image-id {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .success-message {
+            background-color: #dff0d8;
+            color: #3c763d;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .train-model-button {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin: 20px 0;
+        }
+        .train-model-button:hover {
+            background-color: #1976D2;
+        }
+        .training-status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dataset Creation Complete!</h1>
+            <div class="success-message">
+                All images have been successfully generated and added to the dataset.
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="trainModelBtn" class="train-model-button" onclick="startTraining()">
+                Train Your Custom Model
+            </button>
+            <div id="trainingStatus" class="training-status"></div>
+        </div>
+
+        <div class="image-grid">
+            {% for image in images %}
+            <div class="image-card">
+                <img src="{{ image.url }}" alt="Generated Image">
+                <div class="image-info">
+                    <div class="activity-label">{{ image.activity }}</div>
+                    <div class="image-id">Image ID: {{ image.id }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="controls">
+            <a href="{% url 'image_generator:home' %}" class="button">Return to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function startTraining() {
+            const trainBtn = document.getElementById('trainModelBtn');
+            const statusDiv = document.getElementById('trainingStatus');
+            const datasetId = '{{ dataset_id }}';
+            
+            trainBtn.disabled = true;
+            statusDiv.innerHTML = 'Starting training...';
+            
+            fetch(`/train-model/${datasetId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Store the model ID in localStorage or as a data attribute
+                    localStorage.setItem('currentModelId', data.model_id);
+                    statusDiv.innerHTML = `Model training started successfully! Model ID: ${data.model_id}`;
+                    checkTrainingStatus(data.model_id);
+                } else {
+                    statusDiv.innerHTML = 'Error: ' + data.message;
+                    trainBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = 'Error starting training: ' + error;
+                trainBtn.disabled = false;
+            });
+        }
+
+        function checkTrainingStatus(modelId) {
+            const statusDiv = document.getElementById('trainingStatus');
+            
+            fetch(`/check-model-status/${modelId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    statusDiv.innerHTML = `Training Status: ${data.training_status}`;
+                    
+                    if (data.training_status === 'COMPLETE') {
+                        // Redirect to the trained model page
+                        window.location.href = `/trained-model/${modelId}/`;
+                    } else if (data.training_status === 'FAILED') {
+                        statusDiv.innerHTML = 'Training failed!';
+                    } else if (!['COMPLETE', 'FAILED'].includes(data.training_status)) {
+                        // Continue checking if not complete or failed
+                        setTimeout(() => checkTrainingStatus(modelId), 5000);
+                    }
+                } else {
+                    statusDiv.innerHTML = 'Error checking status: ' + data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusDiv.innerHTML = 'Error checking status';
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

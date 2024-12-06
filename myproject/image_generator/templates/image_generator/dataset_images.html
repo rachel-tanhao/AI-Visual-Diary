@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dataset Images</title>
+    <style>
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .image-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .image-info {
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generated Dataset Images</h1>
+    <p>Dataset ID: {{ dataset_id }}</p>
+    
+    <div class="image-grid">
+        {% for image in images %}
+        <div class="image-container">
+            <img src="{{ image.url }}" alt="Dataset image">
+            <div class="image-info">
+                <p>{{ image.activity }}</p>
+                <p>Image ID: {{ image.id }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="text-align: center; margin: 20px;">
+        <a href="{% url 'image_generator:home' %}" class="button">Return to Home</a>
+    </div>
+</body>
+</html>

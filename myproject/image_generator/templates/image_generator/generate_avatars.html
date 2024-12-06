@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Your Avatar</title>
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Create Your Avatar</h1>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Choose a Username:</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error-message">{{ form.username.errors }}</div>
+                {% endif %}
+                <p class="help-text">This username will be used to identify your custom avatar model.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.describe_user.id_for_label }}">Describe Your Avatar:</label>
+                {{ form.describe_user }}
+                {% if form.describe_user.errors %}
+                    <div class="error-message">{{ form.describe_user.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.num_images.id_for_label }}">Number of Images:</label>
+                {{ form.num_images }}
+                {% if form.num_images.errors %}
+                    <div class="error-message">{{ form.num_images.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit">Generate Avatars</button>
+        </form>
+    </div>
+</body>
+</html>
