@@ -173,7 +173,7 @@ def create_user_dataset(dataset_name, seed_image_id, describe_user):
     generated_images = []
     for activity in activities:
         logger.info(f"Generating image for activity: {activity}")
-        prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation."
+        prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation, bright color."
         
         generation_id = generate_with_image_id(seed_image_id, prompt, 1)
         if generation_id:
@@ -239,7 +239,7 @@ def upload_image_to_dataset(dataset_id, generated_image_id):
 
 
 def display_all_images_in_dataset(dataset_id):
-    """Display all images in a dataset."""
+    """Display all images in a dataset with their activities."""
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}"
     
     headers = {
@@ -247,77 +247,73 @@ def display_all_images_in_dataset(dataset_id):
         "authorization": authorization
     }
     
+    # Default activities list (in order)
+    activities = [
+        "playing basketball", "riding a bicycle", "reading a book",
+        "playing the piano", "cooking in the kitchen", "flying a kite",
+        "playing tennis", "swimming in a pool", "watering flowers"
+    ]
+    
     try:
         response = requests.get(url, headers=headers)
-        logger.info(f"Raw dataset response: {response.text}")  # Add this line for debugging
+        logger.info(f"Raw API Response: {response.text}")  # Debug log 1
         
         if response.status_code == 200:
-            dataset = response.json()
-            # The response structure might be different, let's handle both possible paths
-            images = (
-                dataset.get('datasets_by_pk', {}).get('dataset_images', []) or
-                dataset.get('dataset_images', [])
-            )
+            dataset = response.json().get('datasets_by_pk', {})
+            images = dataset.get('dataset_images', [])
+            logger.info(f"Images from API: {images}")  # Debug log 2
             
-            image_urls = []
-            for image in images:
-                # Try different paths to find the URL
-                url = (
-                    image.get('url') or
-                    image.get('image', {}).get('url') or
-                    image.get('generated_image', {}).get('url')
-                )
-                if url:
-                    image_urls.append({
-                        'url': url,
-                        'id': image.get('id') or image.get('image', {}).get('id')
-                    })
-            
-            logger.info(f"Found {len(image_urls)} images in dataset")
-            return image_urls
-            
-        logger.error(f"Failed to get dataset. Status: {response.status_code}")
-        return []
+            if images:
+                image_data = []
+                for idx, image in enumerate(images):
+                    logger.info(f"Processing image: {image}")  # Debug log 3
+                    # Try different paths to get the URL
+                    url = (
+                        image.get('image', {}).get('url') or
+                        image.get('generated_image', {}).get('url') or
+                        image.get('url')
+                    )
+                    if url:
+                        activity = activities[idx] if idx < len(activities) else "Additional activity"
+                        image_data.append({
+                            'url': url,
+                            'id': image.get('id') or image.get('image', {}).get('id'),
+                            'activity': activity
+                        })
+                        logger.info(f"Added image data: {image_data[-1]}")  # Debug log 4
+                
+                logger.info(f"Final image data: {image_data}")  # Debug log 5
+                return image_data
+            else:
+                logger.warning("No images found in dataset response")
+                return []
+        else:
+            logger.error(f"Failed to get dataset. Status code: {response.status_code}")
+            return []
             
     except Exception as e:
         logger.error(f"Error displaying dataset images: {str(e)}")
         return []
+
 ################ model related functions ##################
 
-# def train_user_model(user_model_name, dataset_id):
-#     """Train a custom model using the specified dataset."""
-#     url = "https://cloud.leonardo.ai/api/rest/v1/models"
-#     headers = {
-#         "accept": "application/json",
-#         "content-type": "application/json",
-#         "authorization": authorization
-#     }
-#     payload = {
-#         "modelType": "CHARACTERS",
-#         "datasetId": dataset_id,
-#         "name": user_model_name
-#     }
-#     response = requests.post(url, json=payload, headers=headers, timeout=30)
-#     if response.status_code == 200:
-#         return response.json().get("sdTrainingJob", {}).get("customModelId")
-#     return None
 
-def train_custom_model(dataset_id, user_name):
+def train_custom_model(dataset_id, describe_user):
     """Train a custom model using the specified dataset."""
     url = "https://cloud.leonardo.ai/api/rest/v1/models"
     
-    # Create a model name using username and timestamp
-    model_name = f"custom_model_{user_name}_{int(time.time())}"
+    model_name = f"custom_model_{describe_user}_{int(time.time())}"
+    instance_prompt = f"3D Pixar-style animation of {describe_user}."
     
     payload = {
         "name": model_name,
-        "description": f"Custom model trained for user {user_name}",
+        "description": f"Custom model trained for {describe_user}",
         "datasetId": dataset_id,
-        "modelType": "CHARACTERS",  # Since we're training character models
-        "instance_prompt": f"a {user_name} character",  # This helps identify the subject
+        "modelType": "CHARACTERS",
+        "instance_prompt": instance_prompt,
         "nsfw": False,
-        "resolution": 768,  # Higher resolution for better quality
-        "sd_Version": "v2"  # Using SD 2.1 for better results
+        "resolution": 768,
+        "sd_version": "v2"
     }
     
     headers = {
@@ -326,22 +322,37 @@ def train_custom_model(dataset_id, user_name):
         "authorization": authorization
     }
     
-    logger.info(f"Starting model training for user {user_name} with dataset {dataset_id}")
-    logger.info(f"Training payload: {json.dumps(payload, indent=2)}")
+    logger.info(f"Starting model training with payload: {json.dumps(payload, indent=2)}")
     
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
-        logger.info(f"Training response: {response.text}")
+        response = requests.post(url, json=payload, headers=headers)
+        logger.info(f"Training response status code: {response.status_code}")
+        logger.info(f"Training response body: {response.text}")
         
         if response.status_code == 200:
-            model_id = response.json().get("sdTrainingJob", {}).get("customModelId")
-            logger.info(f"Model training started. Model ID: {model_id}")
-            return model_id
+            response_data = response.json()
+            training_job = response_data.get('sdTrainingJob', {})
+            model_id = training_job.get('customModelId')
+            training_id = training_job.get('id')
+            
+            if model_id:
+                logger.info(f"Successfully extracted model ID: {model_id}")
+                return {
+                    'model_id': model_id,
+                    'training_id': training_id
+                }
+            else:
+                logger.error("No model ID found in response")
+                logger.error(f"Full response: {json.dumps(response_data, indent=2)}")
+                return None
+                
         else:
-            logger.error(f"Failed to start model training. Status: {response.status_code}")
+            logger.error(f"Failed to start training. Response: {response.text}")
             return None
+            
     except Exception as e:
-        logger.error(f"Error during model training: {str(e)}")
+        logger.error(f"Exception during model training: {str(e)}")
+        logger.exception("Full traceback:")
         return None
 
 
@@ -364,6 +375,37 @@ def get_model_status(model_id):
         return None
     except Exception as e:
         logger.error(f"Error checking model status: {str(e)}")
+        return None
+
+
+def generate_with_custom_model(model_id, prompt, num_images=1):
+    """Generate images using a custom trained model."""
+    url = "https://cloud.leonardo.ai/api/rest/v1/generations"
+    
+    payload = {
+        "prompt": prompt,
+        "modelId": model_id,
+        "num_images": num_images,
+        "width": 768,
+        "height": 768,
+        "presetStyle": "DYNAMIC",
+        "public": False
+    }
+    
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": authorization
+    }
+    
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code == 200:
+            generation_id = response.json().get('sdGenerationJob', {}).get('generationId')
+            return generation_id
+        return None
+    except Exception as e:
+        logger.error(f"Error generating with custom model: {str(e)}")
         return None
 
 ################ utils ##################
