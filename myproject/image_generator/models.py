@@ -16,6 +16,7 @@ class UserDiary(models.Model):
     def __str__(self):
         return f"Diary entry {self.id} - {self.created_at}"
 
+
 class GeneratedImage(models.Model):
     user_diary = models.ForeignKey(UserDiary, on_delete=models.CASCADE)
     image_url = models.URLField()
@@ -23,3 +24,11 @@ class GeneratedImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.user_diary}"
+
+
+class UserProfile(models.Model):
+    username = models.CharField(max_length=30, unique=True)
+    # Add other fields as needed, e.g., email, avatar, etc.
+
+    def __str__(self):
+        return self.username

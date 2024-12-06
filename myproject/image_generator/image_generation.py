@@ -128,6 +128,9 @@ def generate_with_image_id(image_id, prompt, num_images):
     return generation_id
 
 
+################ dataset related functions ##################
+
+
 def create_dataset(name):
     """Create a new dataset and return its ID"""
     url = "https://cloud.leonardo.ai/api/rest/v1/datasets"
@@ -210,7 +213,7 @@ def upload_image_to_dataset(dataset_id, generated_image_id):
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}/upload/gen"
     
     payload = {
-        "generatedImageId": generated_image_id  # Changed from imageId to generatedImageId
+        "generatedImageId": generated_image_id
     }
     
     headers = {
@@ -221,7 +224,7 @@ def upload_image_to_dataset(dataset_id, generated_image_id):
     
     try:
         response = requests.post(url, json=payload, headers=headers, timeout=30)
-        print(f"Upload response for image {generated_image_id}: {response.text}")  # Debug log
+        print(f"Upload response for image {generated_image_id}: {response.text}")
         
         if response.status_code == 200:
             return True
@@ -236,66 +239,132 @@ def upload_image_to_dataset(dataset_id, generated_image_id):
 
 
 def display_all_images_in_dataset(dataset_id):
-    """Get all images from a dataset."""
+    """Display all images in a dataset."""
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}"
+    
     headers = {
         "accept": "application/json",
         "authorization": authorization
     }
     
-    response = requests.get(url, headers=headers)
-    print(f"Dataset API response status: {response.status_code}")  # Debug log
-    
-    if response.status_code == 200:
-        dataset_info = response.json().get('datasets_by_pk', {})
-        dataset_images = dataset_info.get('dataset_images', [])
+    try:
+        response = requests.get(url, headers=headers)
+        logger.info(f"Raw dataset response: {response.text}")  # Add this line for debugging
         
-        if not dataset_images:
-            print(f"No images found in dataset {dataset_id}.")
-            return []
+        if response.status_code == 200:
+            dataset = response.json()
+            # The response structure might be different, let's handle both possible paths
+            images = (
+                dataset.get('datasets_by_pk', {}).get('dataset_images', []) or
+                dataset.get('dataset_images', [])
+            )
             
-        print(f"Found {len(dataset_images)} images in dataset {dataset_id}")
-        
-        activities = [
-            "playing basketball", "riding a bicycle", "reading a book",
-            "playing the piano", "cooking in the kitchen", "flying a kite",
-            "playing tennis", "swimming in a pool", "watering flowers"
-        ]
-        
-        images = []
-        for i, image_data in enumerate(dataset_images):
-            activity = activities[i] if i < len(activities) else f"Activity {i+1}"
-            images.append({
-                'id': image_data['id'],
-                'url': image_data['url'],
-                'activity': activity
-            })
-            print(f"Image {i+1}, id={image_data['id']}, URL: {image_data['url']}")
+            image_urls = []
+            for image in images:
+                # Try different paths to find the URL
+                url = (
+                    image.get('url') or
+                    image.get('image', {}).get('url') or
+                    image.get('generated_image', {}).get('url')
+                )
+                if url:
+                    image_urls.append({
+                        'url': url,
+                        'id': image.get('id') or image.get('image', {}).get('id')
+                    })
             
-        return images
-    else:
-        print(f"Failed to retrieve dataset {dataset_id}. Status code: {response.status_code}")
-        print(response.text)
+            logger.info(f"Found {len(image_urls)} images in dataset")
+            return image_urls
+            
+        logger.error(f"Failed to get dataset. Status: {response.status_code}")
         return []
+            
+    except Exception as e:
+        logger.error(f"Error displaying dataset images: {str(e)}")
+        return []
+################ model related functions ##################
 
-def train_user_model(user_model_name, dataset_id):
+# def train_user_model(user_model_name, dataset_id):
+#     """Train a custom model using the specified dataset."""
+#     url = "https://cloud.leonardo.ai/api/rest/v1/models"
+#     headers = {
+#         "accept": "application/json",
+#         "content-type": "application/json",
+#         "authorization": authorization
+#     }
+#     payload = {
+#         "modelType": "CHARACTERS",
+#         "datasetId": dataset_id,
+#         "name": user_model_name
+#     }
+#     response = requests.post(url, json=payload, headers=headers, timeout=30)
+#     if response.status_code == 200:
+#         return response.json().get("sdTrainingJob", {}).get("customModelId")
+#     return None
+
+def train_custom_model(dataset_id, user_name):
     """Train a custom model using the specified dataset."""
     url = "https://cloud.leonardo.ai/api/rest/v1/models"
+    
+    # Create a model name using username and timestamp
+    model_name = f"custom_model_{user_name}_{int(time.time())}"
+    
+    payload = {
+        "name": model_name,
+        "description": f"Custom model trained for user {user_name}",
+        "datasetId": dataset_id,
+        "modelType": "CHARACTERS",  # Since we're training character models
+        "instance_prompt": f"a {user_name} character",  # This helps identify the subject
+        "nsfw": False,
+        "resolution": 768,  # Higher resolution for better quality
+        "sd_Version": "v2"  # Using SD 2.1 for better results
+    }
+    
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
         "authorization": authorization
     }
-    payload = {
-        "modelType": "CHARACTERS",
-        "datasetId": dataset_id,
-        "name": user_model_name
-    }
-    response = requests.post(url, json=payload, headers=headers, timeout=30)
-    if response.status_code == 200:
-        return response.json().get("sdTrainingJob", {}).get("customModelId")
-    return None
+    
+    logger.info(f"Starting model training for user {user_name} with dataset {dataset_id}")
+    logger.info(f"Training payload: {json.dumps(payload, indent=2)}")
+    
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        logger.info(f"Training response: {response.text}")
+        
+        if response.status_code == 200:
+            model_id = response.json().get("sdTrainingJob", {}).get("customModelId")
+            logger.info(f"Model training started. Model ID: {model_id}")
+            return model_id
+        else:
+            logger.error(f"Failed to start model training. Status: {response.status_code}")
+            return None
+    except Exception as e:
+        logger.error(f"Error during model training: {str(e)}")
+        return None
 
+
+def get_model_status(model_id):
+    """Check the status of a model training job."""
+    url = f"https://cloud.leonardo.ai/api/rest/v1/models/{model_id}"
+    
+    headers = {
+        "accept": "application/json",
+        "authorization": authorization
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            model_info = response.json().get("custom_models_by_pk", {})
+            status = model_info.get("status")
+            logger.info(f"Model {model_id} status: {status}")
+            return status
+        return None
+    except Exception as e:
+        logger.error(f"Error checking model status: {str(e)}")
+        return None
 
 ################ utils ##################
 
@@ -364,7 +433,7 @@ def wait_for_image_generation(generation_id):
         elif status == "FAILED":
             print(f"Image generation failed for ID: {generation_id}")
             return False
-        time.sleep(2)  # Wait before checking again
+        time.sleep(5)  # Wait before checking again
 
  
 

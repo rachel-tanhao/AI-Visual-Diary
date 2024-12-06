@@ -15,7 +15,9 @@ from .image_generation import (
     get_generated_image_ids,
     upload_image_to_dataset,
     get_number_of_images_in_dataset,
-    display_all_images_in_dataset
+    display_all_images_in_dataset,
+    train_custom_model,
+    get_model_status
 )
 import requests
 import os
@@ -24,9 +26,12 @@ import json
 from django.http import JsonResponse
 import threading
 import time
+from django.contrib import messages
+from .forms import AvatarGenerationForm
 
 logger = logging.getLogger(__name__)
 
+###################################################
 
 def home(request):
     """Render the home page."""
@@ -51,6 +56,7 @@ def test_leonardo_api_key(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
+############# upload and parse diary ######################
 
 def upload_diary(request):
     if request.method == 'POST':
@@ -76,32 +82,39 @@ def upload_diary(request):
     
     return render(request, 'image_generator/upload_diary.html')
 
+########## allow user to create and select avatar ##############
 
-def generate_images(request, diary_id):
-    """Generate images based on the diary text"""
+def generate_avatars(request):
+    """Generate multiple avatar images based on user description."""
     if request.method == 'POST':
-        # Your image generation logic here
-        # This should use your Leonardo AI functions
-        pass
-    return HttpResponseRedirect(reverse('image_generator:dataset_complete', args=[dataset_id]))
-
-
-def display_generated_images(request, generation_id):
-    """View to display generated images"""
-    # Get images using the function from image_generation.py
-    images = display_images(generation_id)
+        form = AvatarGenerationForm(request.POST)
+        if form.is_valid():
+            describe_user = form.cleaned_data['describe_user']
+            num_images = form.cleaned_data['num_images']
+            
+            # Store the description in session
+            request.session['describe_user'] = describe_user
+            
+            # Preset prompt template
+            prompt_template = "Highly detailed 3D Disney Pixar-style animation of a %s. Disney, Pixar art style, CGI, clean background, high details, 3d animation."
+            prompt = prompt_template % describe_user
+            
+            # logger.info(f"Generating avatars with description: {describe_user}")
+            logger.info(f"Full prompt: {prompt}")
+            
+            try:
+                generation_id = generate(prompt, num_images)
+                if generation_id:
+                    return redirect('image_generator:display_generated_images', generation_id=generation_id)
+                else:
+                    messages.error(request, "Failed to generate avatars. Please try again.")
+            except Exception as e:
+                logger.error(f"Error generating avatars: {str(e)}")
+                messages.error(request, "An error occurred while generating avatars.")
+    else:
+        form = AvatarGenerationForm()
     
-    # Add debugging information
-    print(f"Generation ID: {generation_id}")
-    print(f"Number of images found: {len(images)}")
-    if images:
-        print("Image URLs:", [img['url'] for img in images])
-    
-    context = {
-        'generation_id': generation_id,
-        'images': images,
-    }
-    return render(request, 'image_generator/display_images.html', context)
+    return render(request, 'image_generator/generate_avatars.html', {'form': form})
 
 
 def select_image(request, generation_id):
@@ -126,13 +139,15 @@ def select_image(request, generation_id):
     else:
         print("Request method was not POST")
     
-<<<<<<< HEAD
     return redirect('display_generated_images', generation_id=generation_id)
 
 
+########## use selected avatar to train a model ##############
+
 def create_user_dataset_view(request, selected_image_id):
     if request.method == 'POST':
-        describe_user = request.session.get('user_description', "8-year-old Asian girl with black hair, pigtail hairstyle, very pretty, cute")
+        # Retrieve the user description from the session
+        describe_user = request.session.get('describe_user', "8-year-old Asian girl with black hair, pigtail hairstyle, very pretty, cute")
         dataset_name = f"user_dataset_{selected_image_id[:8]}"
         
         # Initialize progress in session
@@ -160,28 +175,114 @@ def create_user_dataset_view(request, selected_image_id):
     return redirect('image_generator:home')
 
 
+def display_generated_images(request, generation_id):
+    """View to display generated images"""
+    # Get images using the function from image_generation.py
+    images = display_images(generation_id)
+    
+    # Add debugging information
+    print(f"Generation ID: {generation_id}")
+    print(f"Number of images found: {len(images)}")
+    if images:
+        print("Image URLs:", [img['url'] for img in images])
+    
+    context = {
+        'generation_id': generation_id,
+        'images': images,
+    }
+    return render(request, 'image_generator/display_images.html', context)
+
+
+def generate_images(request, diary_id):
+    """Generate images based on the diary text"""
+    if request.method == 'POST':
+        # Your image generation logic here
+        # This should use your Leonardo AI functions
+        pass
+    return HttpResponseRedirect(reverse('image_generator:dataset_complete', args=[dataset_id]))
+
+
+
+
+def train_model_view(request, dataset_id):
+    """View to handle model training initiation."""
+    if request.method == 'POST':
+        # For now, use the username as identifier
+        user_name = request.user.username if request.user.is_authenticated else 'anonymous'
+        
+        try:
+            # Start model training
+            model_id = train_custom_model(dataset_id, user_name)
+            
+            if model_id:
+                # Store model ID in session for tracking
+                request.session['training_model_id'] = model_id
+                
+                messages.success(request, "Model training has started successfully!")
+                return JsonResponse({
+                    'status': 'success',
+                    'model_id': model_id,
+                    'message': 'Model training initiated successfully'
+                })
+            else:
+                messages.error(request, "Failed to start model training.")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Failed to start model training'
+                })
+                
+        except Exception as e:
+            logger.error(f"Error in model training: {str(e)}")
+            messages.error(request, "An error occurred during model training.")
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
+
+def check_model_status_view(request, model_id):
+    """View to check the status of model training."""
+    status = get_model_status(model_id)
+    
+    if status:
+        return JsonResponse({
+            'status': 'success',
+            'training_status': status
+        })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Failed to get model status'
+    })
+
+
+########## utils ##############
+
+
 def create_dataset_background(session_key, dataset_name, seed_image_id, describe_user):
     """Background task to create dataset and update progress"""
     from django.contrib.sessions.backends.db import SessionStore
     session = SessionStore(session_key=session_key)
     
+    logger.info(f"Starting dataset creation with description: {describe_user}")
+    
     try:
-        # Create dataset
         dataset_id = create_dataset(dataset_name)
-        print(f"Dataset created with ID: {dataset_id}")  # Debug log
+        logger.info(f"Dataset created with ID: {dataset_id}")
         
         if not dataset_id:
-            print("Failed to create dataset")  # Debug log
-            # Initialize the progress dictionary if it doesn't exist
-            if 'dataset_progress' not in session:
-                session['dataset_progress'] = {}
+            logger.error("Failed to create dataset")
             session['dataset_progress'].update({
                 'status': 'failed',
                 'logs': ['Failed to create dataset']
             })
             session.save()
             return
-
+            
         # Initialize or update the progress dictionary
         progress_data = session.get('dataset_progress', {})
         progress_data.update({
@@ -203,30 +304,33 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
         
         for idx, activity in enumerate(activities):
             try:
-                print(f"Processing activity: {activity}")  # Debug log
+                prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation."
+                logger.info(f"Activity {idx + 1}/{len(activities)}: {activity}")
+                logger.info(f"Full prompt: {prompt}")
                 
                 progress_data = session.get('dataset_progress', {})
                 progress_data.update({
                     'current_activity': activity,
                     'completed_activities': idx,
-                    'logs': progress_data.get('logs', []) + [f"Starting generation for: {activity}"]
+                    'logs': progress_data.get('logs', []) + [
+                        f"Starting generation for: {activity}",
+                        f"Using prompt: {prompt}"
+                    ]
                 })
                 session['dataset_progress'] = progress_data
                 session.save()
                 
                 # Generate image for activity
-                prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation."
                 generation_id = generate_with_image_id(seed_image_id, prompt, 1)
                 
                 if generation_id:
-                    print(f"Generation started for {activity} with ID: {generation_id}")  # Debug log
+                    logger.info(f"Generation started for {activity} with ID: {generation_id}")
                     session['dataset_progress']['logs'].append(f"Generation started for {activity} (ID: {generation_id})")
                     session.save()
                     
                     # Wait for generation
                     while True:
                         status = check_generation_status(generation_id)
-                        print(f"Status for {activity}: {status}")  # Debug log
                         if status == 'COMPLETE':
                             break
                         time.sleep(2)
@@ -235,7 +339,6 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
                     image_ids = get_generated_image_ids(generation_id)
                     for image_id in image_ids:
                         upload_success = upload_image_to_dataset(dataset_id, image_id)
-                        print(f"Upload status for {image_id}: {upload_success}")  # Debug log
                     
                     session['dataset_progress'].update({
                         'completed_activities': idx + 1,
@@ -243,12 +346,12 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
                     })
                     session.save()
                 else:
-                    print(f"Failed to generate image for {activity}")  # Debug log
+                    logger.info(f"Failed to generate image for {activity}")
                     session['dataset_progress']['logs'].append(f"Failed to generate image for {activity}")
                     session.save()
                 
             except Exception as e:
-                print(f"Error processing activity {activity}: {str(e)}")
+                logger.error(f"Error processing activity {activity}: {str(e)}")
                 progress_data = session.get('dataset_progress', {})
                 progress_data.update({
                     'status': 'error',
@@ -260,10 +363,10 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
         session['dataset_progress']['status'] = 'complete'
         session['dataset_progress']['logs'].append("Dataset creation completed")
         session.save()
-        print("Dataset creation completed successfully")  # Debug log
+        logger.info("Dataset creation completed successfully")
         
     except Exception as e:
-        print(f"Critical error in background task: {str(e)}")
+        logger.error(f"Critical error in background task: {str(e)}")
         progress_data = session.get('dataset_progress', {})
         progress_data.update({
             'status': 'failed',
@@ -295,10 +398,17 @@ def dataset_progress(request, dataset_id=None):
 def dataset_complete(request, dataset_id):
     """Show completed dataset images."""
     images = display_all_images_in_dataset(dataset_id)
+    logger.info(f"Retrieved {len(images)} images for dataset {dataset_id}")
+    logger.info(f"Image data: {images}")  # Add this for debugging
+    
     return render(request, 'image_generator/dataset_complete.html', {
         'dataset_id': dataset_id,
         'images': images
     })
-=======
-    return redirect('display_generated_images', generation_id=generation_id)
->>>>>>> main
+
+
+
+
+
+
+

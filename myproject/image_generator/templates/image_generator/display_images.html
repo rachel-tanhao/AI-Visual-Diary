@@ -3,165 +3,84 @@
 <head>
     <title>Generated Images</title>
     <style>
-<<<<<<< HEAD
-=======
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1, h2 {
-            color: #333;
-        }
->>>>>>> main
         .image-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-<<<<<<< HEAD
             padding: 20px;
-        }
-        .image-container {
-            position: relative;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-=======
-            margin: 20px 0;
         }
         .image-container {
             position: relative;
             cursor: pointer;
             border: 3px solid transparent;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
         }
         .image-container.selected {
             border-color: #4CAF50;
->>>>>>> main
         }
         .image-container img {
             width: 100%;
             height: auto;
-            border-radius: 5px;
+            display: block;
         }
-<<<<<<< HEAD
-        .selected {
-            border: 3px solid #4CAF50;
+        .buttons {
+            text-align: center;
+            margin: 20px;
         }
-        .button {
-            display: inline-block;
+        .confirm-button {
             padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 10px;
-        }
-        .button:hover {
-            background-color: #45a049;
-        }
-        .controls {
-            text-align: center;
-            margin: 20px;
-=======
-        .buttons {
-            text-align: center;
-            margin-top: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 0 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-        }
-        .confirm-button {
-            background-color: #4CAF50;
-            color: white;
         }
         .confirm-button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
-        .upload-another {
-            background-color: #2196F3;
-            color: white;
->>>>>>> main
-        }
     </style>
 </head>
 <body>
-<<<<<<< HEAD
-    <h1>Select Your Avatar</h1>
-    <form action="{% url 'image_generator:select_image' generation_id=generation_id %}" method="POST" id="imageForm">
+    <h1>Generated Images</h1>
+    <form action="{% url 'image_generator:select_image' generation_id=generation_id %}" method="post">
         {% csrf_token %}
-=======
-    <h1>Generated Avatars</h1>
-    <h2>Generation ID: {{ generation_id }}</h2>
-
-    <form id="selectImageForm" method="POST" action="{% url 'select_image' generation_id=generation_id %}">
-        {% csrf_token %}
-        <input type="hidden" id="selected_image_id" name="image_id" value="">
-        
->>>>>>> main
         <div class="image-grid">
             {% for image in images %}
             <div class="image-container" onclick="selectImage(this, '{{ image.id }}')">
-                <img src="{{ image.url }}" alt="Generated image {{ forloop.counter }}">
-<<<<<<< HEAD
-            </div>
-            {% endfor %}
-        </div>
-        <input type="hidden" name="image_id" id="selectedImage">
-        <div class="controls">
-            <button type="submit" class="button">Use Selected Image</button>
-            <a href="{% url 'image_generator:home' %}" class="button">Generate New Images</a>
-=======
+                <img src="{{ image.url }}" alt="Generated Image">
                 <div style="display: none;">Image ID: {{ image.id }}</div>
             </div>
             {% endfor %}
         </div>
 
+        <input type="hidden" name="image_id" id="selectedImage">
         <div class="buttons">
             <button type="submit" class="confirm-button" id="confirmButton" disabled>
                 Confirm Selection
             </button>
-            <a href="{% url 'upload_diary' %}" class="button upload-another">
-                Upload another diary
+            <a href="{% url 'image_generator:home' %}" class="button">
+                Generate New Images
             </a>
->>>>>>> main
         </div>
     </form>
 
     <script>
         function selectImage(container, imageId) {
-<<<<<<< HEAD
-=======
-            console.log('Selected image ID:', imageId);
-            
->>>>>>> main
             // Remove selection from all containers
-            document.querySelectorAll('.image-container').forEach(cont => {
-                cont.classList.remove('selected');
+            document.querySelectorAll('.image-container').forEach(el => {
+                el.classList.remove('selected');
             });
             
             // Add selection to clicked container
             container.classList.add('selected');
             
-<<<<<<< HEAD
             // Update hidden input
             document.getElementById('selectedImage').value = imageId;
-=======
-            // Update hidden input with selected image ID
-            document.getElementById('selected_image_id').value = imageId;
             
             // Enable confirm button
             document.getElementById('confirmButton').disabled = false;
->>>>>>> main
         }
     </script>
 </body>
