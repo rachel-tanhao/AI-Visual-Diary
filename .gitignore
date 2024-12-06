@@ -16,3 +16,4 @@ __pycache__/
 /myproject/image_generator/migrations/__pycache__
 
 
+.DS_Store
