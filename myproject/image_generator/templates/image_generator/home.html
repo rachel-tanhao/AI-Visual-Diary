@@ -19,7 +19,7 @@
                 <div id="modelStatus">
                     {% if model_status == 'COMPLETE' %}
                         <div class="text-center">
-                            <img src="{% static 'images/ready.png' %}" alt="Ready" class="mb-4" style="max-width: 200px;">
+                            <i class="fas fa-magic fa-4x mb-4" style="color: var(--primary-color)"></i>
                             <h3 class="mb-3">Your Magic Wand is Ready! 🪄</h3>
                             <p class="mb-4">Let's turn your diary into beautiful pictures!</p>
                             <a href="{% url 'image_generator:upload_diary' %}" class="btn btn-primary btn-lg">
@@ -28,7 +28,7 @@
                         </div>
                     {% else %}
                         <div class="text-center">
-                            <img src="{% static 'images/create.png' %}" alt="Create" class="mb-4" style="max-width: 200px;">
+                            <i class="fas fa-palette fa-4x mb-4" style="color: var(--secondary-color)"></i>
                             <h3 class="mb-3">Let's Create Your Character! 🎨</h3>
                             <p class="mb-4">First, we'll make a special character just for you!</p>
                             <a href="{% url 'image_generator:generate_avatars' %}" class="btn btn-primary btn-lg">
