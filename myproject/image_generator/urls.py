@@ -33,6 +33,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('display-diary-scenes/<str:dataset_id>/', views.display_diary_scenes, name='display_diary_scenes'),
     path('check-dataset-progress/<str:dataset_id>/', views.check_dataset_progress, name='check_dataset_progress'),
+    path('get-dataset-images/<str:dataset_id>/', views.get_dataset_images, name='get_dataset_images'),
 ]
 
 # urlpatterns = [

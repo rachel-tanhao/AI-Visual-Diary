@@ -718,18 +718,23 @@ def generate_with_model(request, model_id):
             'message': str(e)
         }, status=500)
 
+
 def display_diary_scenes(request, dataset_id):
     """Display generated diary scenes with progress tracking"""
     try:
         # 获取场景列表
         scenes = request.session.get('generated_scenes', [])
         
+        # 获取数据集中的图片
+        dataset_images = display_all_images_in_dataset(dataset_id)
+        
         # 准备场景和图片的映射
         scene_images = []
-        for scene in scenes:
+        for i, scene in enumerate(scenes):
+            image_url = dataset_images[i]['url'] if i < len(dataset_images) else ''
             scene_images.append({
                 'scene': scene,
-                'image_url': ''  # 图片URL将通过JavaScript动态更新
+                'image_url': image_url
             })
         
         return render(request, 'image_generator/display_diary_scenes.html', {
@@ -741,6 +746,7 @@ def display_diary_scenes(request, dataset_id):
         logger.error(f"Error displaying diary scenes: {str(e)}")
         messages.error(request, 'Error displaying scenes')
         return redirect('image_generator:upload_diary')
+
 
 def generate_images_background(scenes, dataset_id, describe_user, model_id):
     """Background task to generate images"""
@@ -909,6 +915,24 @@ def check_dataset_progress(request, dataset_id):
         }, status=500)
     except Exception as e:
         logger.error(f"Error checking dataset progress: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+def get_dataset_images(request, dataset_id):
+    """获取数据集中的图片URL"""
+    try:
+        # 使用已有的 display_all_images_in_dataset 函数
+        images = display_all_images_in_dataset(dataset_id)
+        logger.info(f"Retrieved {len(images)} images for dataset {dataset_id}")
+        
+        return JsonResponse({
+            'status': 'success',
+            'images': images
+        })
+    except Exception as e:
+        logger.error(f"Error getting dataset images: {str(e)}")
         return JsonResponse({
             'status': 'error',
             'message': str(e)

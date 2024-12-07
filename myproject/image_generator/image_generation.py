@@ -226,10 +226,7 @@ def upload_image_to_dataset(dataset_id, image_id):
 
 
 def display_all_images_in_dataset(dataset_id):
-    """显示数据集中的所有图片
-    在 dataset_complete() view 中被调用
-    返回数据集中的所有图片信息
-    """
+    """获取数据集中所有图片的URL"""
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}"
     
     headers = {
@@ -237,53 +234,29 @@ def display_all_images_in_dataset(dataset_id):
         "authorization": authorization
     }
     
-    # Default activities list (in order)
-    activities = [
-        "playing basketball", "riding a bicycle", "reading a book",
-        "playing the piano", "cooking in the kitchen", "flying a kite",
-        "playing tennis", "swimming in a pool", "watering flowers"
-    ]
-    
     try:
         response = requests.get(url, headers=headers)
-        logger.info(f"Raw API Response: {response.text}")  # Debug log 1
-        
         if response.status_code == 200:
             dataset = response.json().get('datasets_by_pk', {})
             images = dataset.get('dataset_images', [])
-            logger.info(f"Images from API: {images}")  # Debug log 2
             
-            if images:
-                image_data = []
-                for idx, image in enumerate(images):
-                    logger.info(f"Processing image: {image}")  # Debug log 3
-                    # Try different paths to get the URL
-                    url = (
-                        image.get('image', {}).get('url') or
-                        image.get('generated_image', {}).get('url') or
-                        image.get('url')
-                    )
-                    if url:
-                        activity = activities[idx] if idx < len(activities) else "Additional activity"
-                        image_data.append({
-                            'url': url,
-                            'id': image.get('id') or image.get('image', {}).get('id'),
-                            'activity': activity
-                        })
-                        logger.info(f"Added image data: {image_data[-1]}")  # Debug log 4
-                
-                logger.info(f"Final image data: {image_data}")  # Debug log 5
-                return image_data
-            else:
-                logger.warning("No images found in dataset response")
-                return []
-        else:
-            logger.error(f"Failed to get dataset. Status code: {response.status_code}")
-            return []
+            # 提取每个图片的URL
+            image_urls = []
+            for image in images:
+                image_url = image.get('url')
+                if image_url:
+                    image_urls.append({
+                        'url': image_url,
+                        'id': image.get('id')
+                    })
+            
+            logger.info(f"Found {len(image_urls)} images in dataset {dataset_id}")
+            return image_urls
             
     except Exception as e:
-        logger.error(f"Error displaying dataset images: {str(e)}")
+        logger.error(f"Error getting dataset images: {str(e)}")
         return []
+
 
 
 ################ model related functions ##################

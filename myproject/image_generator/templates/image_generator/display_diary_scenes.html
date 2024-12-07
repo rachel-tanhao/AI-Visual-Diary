@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalScenes = {{ scene_images|length }};
     const datasetId = "{{ dataset_id }}";
     let currentImages = 0;
-    let lastImageCount = 0;  // 用于跟踪新图片生成
     
     function updateProgress() {
         fetch(`/check-dataset-progress/${datasetId}/`)
@@ -75,13 +74,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const statusText = document.getElementById('statusText');
                 statusText.textContent = `Generated ${currentImages} of ${totalScenes} images...`;
                 
-                // Only add log message if new images were generated
-                if (currentImages > lastImageCount) {
-                    const logMessages = document.getElementById('logMessages');
-                    logMessages.innerHTML += `<div>[${new Date().toLocaleTimeString()}] Generated image ${currentImages} of ${totalScenes}</div>`;
-                    logMessages.scrollTop = logMessages.scrollHeight;
-                    lastImageCount = currentImages;
-                }
+                // Add log message
+                const logMessages = document.getElementById('logMessages');
+                logMessages.innerHTML += `<div>[${new Date().toLocaleTimeString()}] Generated image ${currentImages} of ${totalScenes}</div>`;
+                logMessages.scrollTop = logMessages.scrollHeight;
                 
                 // Check if generation is complete
                 if (currentImages === totalScenes) {
@@ -89,13 +85,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     const logMessages = document.getElementById('logMessages');
                     logMessages.innerHTML += `<div class="text-success">[${new Date().toLocaleTimeString()}] All images generated successfully!</div>`;
                     
-                    // 延迟隐藏进度条和显示图片，给用户时间看到100%
-                    setTimeout(() => {
-                        document.getElementById('progressSection').style.display = 'none';
-                        document.getElementById('imagesGrid').style.display = 'flex';
-                    }, 1500);
+                    // 获取最新的图片URL
+                    fetch(`/get-dataset-images/${datasetId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // 更新图片URL
+                            const imageGrid = document.getElementById('imagesGrid');
+                            const images = imageGrid.getElementsByTagName('img');
+                            data.images.forEach((imageData, index) => {
+                                if (images[index]) {
+                                    images[index].src = imageData.url;
+                                }
+                            });
+                            
+                            // 显示图片网格
+                            setTimeout(() => {
+                                document.getElementById('progressSection').style.display = 'none';
+                                imageGrid.style.display = 'flex';
+                            }, 1500);
+                        });
                 } else {
-                    // Continue polling
                     setTimeout(updateProgress, 3000);
                 }
             })
@@ -103,15 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error checking progress:', error);
                 const logMessages = document.getElementById('logMessages');
                 logMessages.innerHTML += `<div class="text-danger">[${new Date().toLocaleTimeString()}] Error: ${error.message}</div>`;
-                
-                // 继续尝试更新，即使发生错误
-                setTimeout(updateProgress, 5000);
             });
     }
-    
-    // 确保进度条显示，图片网格隐藏
-    document.getElementById('progressSection').style.display = 'block';
-    document.getElementById('imagesGrid').style.display = 'none';
     
     // Start progress monitoring
     updateProgress();
