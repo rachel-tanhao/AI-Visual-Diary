@@ -108,17 +108,13 @@ def create_dataset(name):
 
 
 def generate_with_image_id(seed_image_id, prompt, num_images):
-    """基于选定的头像生成其他场景图片
-    在 create_dataset_background() 中被调用
-    返回 generation_id
-    """
+    """基于选定的头像生成其他场景图片"""
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
         "authorization": authorization
     }
 
-    # Generate with an image prompt: use Character Reference to control consistency
     url = "https://cloud.leonardo.ai/api/rest/v1/generations"
 
     payload = {
@@ -130,30 +126,42 @@ def generate_with_image_id(seed_image_id, prompt, num_images):
         "prompt": prompt,
         "width": 1024,
         "controlnets": [
-                # {
-                #     "initImageId": seed_image_id,
-                #     "initImageType": "GENERATED",
-                #     "preprocessorId": 133, # character reference
-                #     "strengthType": "Low",
-                # },
-              {
-                  "initImageId": seed_image_id,
-                  "initImageType": "GENERATED",
-                  "preprocessorId": 67, #Style Reference Id
-                  "strengthType": "Low",
-              }
-          ]
+            {
+                "initImageId": seed_image_id,
+                "initImageType": "GENERATED",
+                "preprocessorId": 67, #Style Reference Id
+                "strengthType": "Low",
+            }
+        ]
     }
 
-    response = requests.post(url, json=payload, headers=headers)
-
-    # Print response for debugging
-    print(f"Status code: {response.status_code}")
-    print(f"Response: {response.text}")
-
-    # Get the generation of images
-    generation_id = response.json()['sdGenerationJob']['generationId']
-    return generation_id
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        response.raise_for_status()  # 检查 HTTP 错误
+        
+        response_data = response.json()
+        logger.info(f"Generation response: {response_data}")  # 添加日志
+        
+        if 'sdGenerationJob' not in response_data:
+            logger.error(f"Unexpected API response format: {response_data}")
+            return None
+            
+        generation_id = response_data['sdGenerationJob'].get('generationId')
+        if not generation_id:
+            logger.error("No generationId in response")
+            return None
+            
+        return generation_id
+        
+    except requests.exceptions.RequestException as e:
+        logger.error(f"API request failed: {str(e)}")
+        return None
+    except ValueError as e:
+        logger.error(f"JSON parsing failed: {str(e)}")
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error in generate_with_image_id: {str(e)}")
+        return None
 
 
 def check_generation_status(generation_id):
@@ -492,4 +500,3 @@ def check_dataset_status(dataset_id):
     except Exception as e:
         logger.error(f"Error checking dataset status: {str(e)}")
     return None
-

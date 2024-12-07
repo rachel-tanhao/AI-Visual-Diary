@@ -76,14 +76,24 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* 修改图片容器样式 */
+.carousel-item {
+    height: auto;
+    padding: 20px;
+}
+
+/* 修改图片样式 */
 .carousel-item img {
     border-radius: 10px;
     width: 100%;
     height: auto;
-    object-fit: contain;
-    max-height: none;
+    max-height: 600px; /* 设置最大高度 */
+    object-fit: contain; /* 保持图片比例并完整显示 */
+    margin: 0 auto;
+    display: block;
 }
 
+/* 调整导航按钮位置 */
 .carousel-control-prev,
 .carousel-control-next {
     width: 5%;
@@ -92,15 +102,20 @@
     height: 40px;
     top: 50%;
     transform: translateY(-50%);
+    margin: 0 10px;
 }
 
 .card {
     border: none;
     background: transparent;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-body {
     padding: 1.5rem;
+    flex-grow: 0;
 }
 
 .card-text {
@@ -112,6 +127,18 @@
 .scene-counter {
     font-size: 0.9rem;
     color: #666;
+}
+
+/* 添加响应式调整 */
+@media (max-width: 768px) {
+    .carousel-item img {
+        max-height: 400px;
+    }
+    
+    .carousel {
+        max-width: 100%;
+        padding: 10px;
+    }
 }
 
 /* 添加键盘导航提示 */
@@ -136,13 +163,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentImages = data.image_count;
                 const progress = Math.round((currentImages / totalScenes) * 100);
                 
+                // 添加日志输出
+                console.log(`Progress update: ${currentImages}/${totalScenes} images`);
+                
                 // Update progress bar
                 const progressBar = document.getElementById('progressBar');
                 progressBar.style.width = `${progress}%`;
                 progressBar.setAttribute('aria-valuenow', progress);
                 progressBar.textContent = `${progress}%`;
                 
-                // Update status text
+                // Update status text with more detail
                 const statusText = document.getElementById('statusText');
                 statusText.textContent = `Generated ${currentImages} of ${totalScenes} images (${progress}%)...`;
                 
@@ -151,7 +181,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 logMessages.innerHTML += `<div>[${new Date().toLocaleTimeString()}] Progress: ${currentImages}/${totalScenes} (${progress}%)</div>`;
                 logMessages.scrollTop = logMessages.scrollHeight;
                 
-                if (currentImages === totalScenes) {
+                if (currentImages >= totalScenes) {
+                    // 添加成功完成的日志
                     logMessages.innerHTML += `<div class="text-success">[${new Date().toLocaleTimeString()}] All images generated successfully!</div>`;
                     
                     setTimeout(() => {
@@ -160,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             .then(data => {
                                 if (data.status === 'success' && data.images) {
                                     // 按索引更新图片
-                                    data.images.forEach((imageData, index) => {
+                                    data.images.slice(0, totalScenes).forEach((imageData, index) => {
                                         const img = document.querySelector(`img[data-image-index="${index}"]`);
                                         if (img) {
                                             img.src = imageData.url;

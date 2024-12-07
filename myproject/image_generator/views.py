@@ -824,7 +824,6 @@ def display_diary_scenes(request, dataset_id):
 
 #备用的
 def generate_images_background(scenes, dataset_id, model_id, username):
-    """Background task to generate images"""
     try:
         logger.info(f"Starting background generation for {len(scenes)} scenes")
         logger.info(f"Username: {username}, Dataset ID: {dataset_id}, Model ID: {model_id}")
@@ -863,39 +862,45 @@ def generate_images_background(scenes, dataset_id, model_id, username):
                     logger.info(f"Generation status for scene {index}: {status}")
                     if status == 'COMPLETE':
                         break
+                    elif status == 'FAILED':
+                        logger.error(f"Generation failed for scene {index}")
+                        break
                     time.sleep(2)
                 
-                # 获取生成的图片ID
-                image_ids = get_generated_image_ids(generation_id)
-                logger.info(f"Got image IDs for scene {index}: {image_ids}")
-                
-                # 存储图片ID和它的索引
-                for image_id in image_ids:
-                    generated_images.append({
-                        'index': index,
-                        'image_id': image_id,
-                        'scene': scene
-                    })
+                if status == 'COMPLETE':
+                    # 获取生成的图片ID
+                    image_ids = get_generated_image_ids(generation_id)
+                    logger.info(f"Got image IDs for scene {index}: {image_ids}")
+                    
+                    # 立即尝试上传到数据集
+                    for image_id in image_ids:
+                        try:
+                            upload_success = upload_image_to_dataset(dataset_id, image_id)
+                            logger.info(f"Immediate upload for scene {index}, image {image_id}: {upload_success}")
+                            if upload_success:
+                                generated_images.append({
+                                    'index': index,
+                                    'image_id': image_id,
+                                    'scene': scene
+                                })
+                            else:
+                                logger.error(f"Failed to upload image {image_id} for scene {index}")
+                        except Exception as upload_error:
+                            logger.error(f"Error uploading image {image_id} for scene {index}: {str(upload_error)}")
                 
             except Exception as e:
                 logger.error(f"Error generating scene {index} '{scene}': {str(e)}")
                 logger.exception("Full traceback:")
 
-        # 按索引排序
-        generated_images.sort(key=lambda x: x['index'])
-        
-        # 按顺序上传到数据集
-        for image_data in generated_images:
-            try:
-                upload_success = upload_image_to_dataset(dataset_id, image_data['image_id'])
-                logger.info(f"Upload result for scene {image_data['index']} ({image_data['scene']}): {upload_success}")
-            except Exception as e:
-                logger.error(f"Error uploading image for scene {image_data['index']}: {str(e)}")
+        # 记录最终结果
+        logger.info(f"Generation completed. Total successful uploads: {len(generated_images)}")
+        logger.info(f"Generated images details: {generated_images}")
                 
     except Exception as e:
         logger.error(f"Critical error in background generation: {str(e)}")
         logger.exception("Full traceback:")
 
+        
 
 def view_generated_scenes(request):
     """Display generated scenes"""
@@ -1058,6 +1063,5 @@ def get_dataset_images(request, dataset_id):
             'status': 'error',
             'message': str(e)
         }, status=500)
-
 
 

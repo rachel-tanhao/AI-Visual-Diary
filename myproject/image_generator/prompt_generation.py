@@ -52,7 +52,7 @@ def process_diary_text(diary_text):
             "swaying gently to jazz music in a cozy, dim-lit café, a steaming coffee nearby"
 
             **Now, please apply the same style and process to the following diary entry:**
-
+ 
             {diary_text}
 
         """
