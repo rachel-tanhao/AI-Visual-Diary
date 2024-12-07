@@ -3519,3 +3519,198 @@ INFO 2024-12-07 06:29:59,204 autoreload Watching for file changes with StatReloa
 WARNING 2024-12-07 06:31:00,030 log Not Found: /home/
 INFO 2024-12-07 06:31:44,037 autoreload Watching for file changes with StatReloader
 WARNING 2024-12-07 06:31:45,951 log Not Found: /home/
+INFO 2024-12-07 06:37:09,031 autoreload Watching for file changes with StatReloader
+INFO 2024-12-07 06:38:00,727 views Starting dataset creation with description: a cool 12-year-old boy with pink hair and green eyes
+INFO 2024-12-07 06:38:00,927 views Dataset created with ID: 5cafcd75-09ef-4cf5-9c32-7217d73c5068
+INFO 2024-12-07 06:38:00,931 views Activity 1/9: playing basketball
+INFO 2024-12-07 06:38:00,932 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, playing basketball. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:38:02,451 views Generation started for playing basketball with ID: aa6b5047-2f8a-4350-9d59-bab8ae12e02d
+INFO 2024-12-07 06:38:18,248 views Activity 2/9: riding a bicycle
+INFO 2024-12-07 06:38:18,249 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, riding a bicycle. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:38:19,481 views Generation started for riding a bicycle with ID: 9d4f627b-f2e7-40c0-ad93-8b701f0d427f
+INFO 2024-12-07 06:38:35,656 views Activity 3/9: reading a book
+INFO 2024-12-07 06:38:35,656 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, reading a book. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:38:37,321 views Generation started for reading a book with ID: 61a27995-57ce-4190-b13e-cc87c7b1053f
+INFO 2024-12-07 06:38:51,323 views Activity 4/9: playing the piano
+INFO 2024-12-07 06:38:51,323 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, playing the piano. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:38:52,755 views Generation started for playing the piano with ID: 3e137c0a-1d31-4cd4-9b7b-583b1043f435
+INFO 2024-12-07 06:39:08,728 views Activity 5/9: cooking in the kitchen
+INFO 2024-12-07 06:39:08,729 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, cooking in the kitchen. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:39:10,048 views Generation started for cooking in the kitchen with ID: 22ff868f-7432-429c-813e-2f8458e88e0e
+INFO 2024-12-07 06:39:24,689 views Activity 6/9: flying a kite
+INFO 2024-12-07 06:39:24,689 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, flying a kite. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:39:26,785 views Generation started for flying a kite with ID: a8d0fba5-d958-45f7-affe-24102cdb243a
+INFO 2024-12-07 06:39:39,227 views Activity 7/9: playing tennis
+INFO 2024-12-07 06:39:39,227 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, playing tennis. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:39:40,739 views Generation started for playing tennis with ID: ccb79205-2232-45be-915f-4399ae1d92a6
+INFO 2024-12-07 06:39:52,552 views Activity 8/9: swimming in a pool
+INFO 2024-12-07 06:39:52,552 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, swimming in a pool. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:39:53,980 views Generation started for swimming in a pool with ID: 82bbfdd6-ebe1-4de5-be63-c4c578ce5057
+INFO 2024-12-07 06:40:10,161 views Activity 9/9: watering flowers
+INFO 2024-12-07 06:40:10,162 views Full prompt: Highly detailed 3D Disney Pixar-style animation of a a cool 12-year-old boy with pink hair and green eyes, watering flowers. Disney, Pixar art style, CGI, high details, 3d animation.
+INFO 2024-12-07 06:40:11,497 views Generation started for watering flowers with ID: 70f5bd89-e152-44c1-9c8a-a9d77804c63f
+INFO 2024-12-07 06:40:29,940 views Dataset creation completed successfully
+INFO 2024-12-07 06:40:31,836 image_generation Raw API Response: {"datasets_by_pk":{"id":"5cafcd75-09ef-4cf5-9c32-7217d73c5068","createdAt":"2024-12-07T06:38:01","description":null,"name":"user_dataset_8c84f90c","updatedAt":"2024-12-07T06:38:01","dataset_images":[{"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1d564dd-d133-4652-966e-f78c2211eb61/primary.jpg","id":"d1d564dd-d133-4652-966e-f78c2211eb61","createdAt":"2024-12-07T06:39:08.583"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/59e8db9d-0826-4525-95e2-91ae5f4c7283/primary.jpg","id":"59e8db9d-0826-4525-95e2-91ae5f4c7283","createdAt":"2024-12-07T06:38:17.968"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/6d2b4a04-3f38-4bbe-a1ef-140070f0eba7/primary.jpg","id":"6d2b4a04-3f38-4bbe-a1ef-140070f0eba7","createdAt":"2024-12-07T06:38:51.092"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9/primary.jpg","id":"d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9","createdAt":"2024-12-07T06:39:24.49"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/ef71099e-d71c-41e8-bbf8-6ba6708394b1/primary.jpg","id":"ef71099e-d71c-41e8-bbf8-6ba6708394b1","createdAt":"2024-12-07T06:38:35.431"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/feedc29e-83bb-436f-8818-87ffd3c494a2/primary.jpg","id":"feedc29e-83bb-436f-8818-87ffd3c494a2","createdAt":"2024-12-07T06:39:39.061"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/e0448ba5-946a-4e15-a21c-8a1c4459bbbe/primary.jpg","id":"e0448ba5-946a-4e15-a21c-8a1c4459bbbe","createdAt":"2024-12-07T06:39:52.405"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/be383f1f-38cd-4f34-911b-ac435982fbef/primary.jpg","id":"be383f1f-38cd-4f34-911b-ac435982fbef","createdAt":"2024-12-07T06:40:09.926"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/a30d68b2-c1ab-4294-b0d3-66f257fc67b3/primary.jpg","id":"a30d68b2-c1ab-4294-b0d3-66f257fc67b3","createdAt":"2024-12-07T06:40:29.485"}]}}
+INFO 2024-12-07 06:40:31,836 image_generation Images from API: [{'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1d564dd-d133-4652-966e-f78c2211eb61/primary.jpg', 'id': 'd1d564dd-d133-4652-966e-f78c2211eb61', 'createdAt': '2024-12-07T06:39:08.583'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/59e8db9d-0826-4525-95e2-91ae5f4c7283/primary.jpg', 'id': '59e8db9d-0826-4525-95e2-91ae5f4c7283', 'createdAt': '2024-12-07T06:38:17.968'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/6d2b4a04-3f38-4bbe-a1ef-140070f0eba7/primary.jpg', 'id': '6d2b4a04-3f38-4bbe-a1ef-140070f0eba7', 'createdAt': '2024-12-07T06:38:51.092'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9/primary.jpg', 'id': 'd1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9', 'createdAt': '2024-12-07T06:39:24.49'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/ef71099e-d71c-41e8-bbf8-6ba6708394b1/primary.jpg', 'id': 'ef71099e-d71c-41e8-bbf8-6ba6708394b1', 'createdAt': '2024-12-07T06:38:35.431'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/feedc29e-83bb-436f-8818-87ffd3c494a2/primary.jpg', 'id': 'feedc29e-83bb-436f-8818-87ffd3c494a2', 'createdAt': '2024-12-07T06:39:39.061'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/e0448ba5-946a-4e15-a21c-8a1c4459bbbe/primary.jpg', 'id': 'e0448ba5-946a-4e15-a21c-8a1c4459bbbe', 'createdAt': '2024-12-07T06:39:52.405'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/be383f1f-38cd-4f34-911b-ac435982fbef/primary.jpg', 'id': 'be383f1f-38cd-4f34-911b-ac435982fbef', 'createdAt': '2024-12-07T06:40:09.926'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/a30d68b2-c1ab-4294-b0d3-66f257fc67b3/primary.jpg', 'id': 'a30d68b2-c1ab-4294-b0d3-66f257fc67b3', 'createdAt': '2024-12-07T06:40:29.485'}]
+INFO 2024-12-07 06:40:31,836 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1d564dd-d133-4652-966e-f78c2211eb61/primary.jpg', 'id': 'd1d564dd-d133-4652-966e-f78c2211eb61', 'createdAt': '2024-12-07T06:39:08.583'}
+INFO 2024-12-07 06:40:31,836 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1d564dd-d133-4652-966e-f78c2211eb61/primary.jpg', 'id': 'd1d564dd-d133-4652-966e-f78c2211eb61', 'activity': 'playing basketball'}
+INFO 2024-12-07 06:40:31,837 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/59e8db9d-0826-4525-95e2-91ae5f4c7283/primary.jpg', 'id': '59e8db9d-0826-4525-95e2-91ae5f4c7283', 'createdAt': '2024-12-07T06:38:17.968'}
+INFO 2024-12-07 06:40:31,837 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/59e8db9d-0826-4525-95e2-91ae5f4c7283/primary.jpg', 'id': '59e8db9d-0826-4525-95e2-91ae5f4c7283', 'activity': 'riding a bicycle'}
+INFO 2024-12-07 06:40:31,837 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/6d2b4a04-3f38-4bbe-a1ef-140070f0eba7/primary.jpg', 'id': '6d2b4a04-3f38-4bbe-a1ef-140070f0eba7', 'createdAt': '2024-12-07T06:38:51.092'}
+INFO 2024-12-07 06:40:31,837 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/6d2b4a04-3f38-4bbe-a1ef-140070f0eba7/primary.jpg', 'id': '6d2b4a04-3f38-4bbe-a1ef-140070f0eba7', 'activity': 'reading a book'}
+INFO 2024-12-07 06:40:31,837 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9/primary.jpg', 'id': 'd1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9', 'createdAt': '2024-12-07T06:39:24.49'}
+INFO 2024-12-07 06:40:31,837 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9/primary.jpg', 'id': 'd1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9', 'activity': 'playing the piano'}
+INFO 2024-12-07 06:40:31,837 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/ef71099e-d71c-41e8-bbf8-6ba6708394b1/primary.jpg', 'id': 'ef71099e-d71c-41e8-bbf8-6ba6708394b1', 'createdAt': '2024-12-07T06:38:35.431'}
+INFO 2024-12-07 06:40:31,837 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/ef71099e-d71c-41e8-bbf8-6ba6708394b1/primary.jpg', 'id': 'ef71099e-d71c-41e8-bbf8-6ba6708394b1', 'activity': 'cooking in the kitchen'}
+INFO 2024-12-07 06:40:31,837 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/feedc29e-83bb-436f-8818-87ffd3c494a2/primary.jpg', 'id': 'feedc29e-83bb-436f-8818-87ffd3c494a2', 'createdAt': '2024-12-07T06:39:39.061'}
+INFO 2024-12-07 06:40:31,837 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/feedc29e-83bb-436f-8818-87ffd3c494a2/primary.jpg', 'id': 'feedc29e-83bb-436f-8818-87ffd3c494a2', 'activity': 'flying a kite'}
+INFO 2024-12-07 06:40:31,837 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/e0448ba5-946a-4e15-a21c-8a1c4459bbbe/primary.jpg', 'id': 'e0448ba5-946a-4e15-a21c-8a1c4459bbbe', 'createdAt': '2024-12-07T06:39:52.405'}
+INFO 2024-12-07 06:40:31,838 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/e0448ba5-946a-4e15-a21c-8a1c4459bbbe/primary.jpg', 'id': 'e0448ba5-946a-4e15-a21c-8a1c4459bbbe', 'activity': 'playing tennis'}
+INFO 2024-12-07 06:40:31,838 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/be383f1f-38cd-4f34-911b-ac435982fbef/primary.jpg', 'id': 'be383f1f-38cd-4f34-911b-ac435982fbef', 'createdAt': '2024-12-07T06:40:09.926'}
+INFO 2024-12-07 06:40:31,838 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/be383f1f-38cd-4f34-911b-ac435982fbef/primary.jpg', 'id': 'be383f1f-38cd-4f34-911b-ac435982fbef', 'activity': 'swimming in a pool'}
+INFO 2024-12-07 06:40:31,838 image_generation Processing image: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/a30d68b2-c1ab-4294-b0d3-66f257fc67b3/primary.jpg', 'id': 'a30d68b2-c1ab-4294-b0d3-66f257fc67b3', 'createdAt': '2024-12-07T06:40:29.485'}
+INFO 2024-12-07 06:40:31,838 image_generation Added image data: {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/a30d68b2-c1ab-4294-b0d3-66f257fc67b3/primary.jpg', 'id': 'a30d68b2-c1ab-4294-b0d3-66f257fc67b3', 'activity': 'watering flowers'}
+INFO 2024-12-07 06:40:31,838 image_generation Final image data: [{'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1d564dd-d133-4652-966e-f78c2211eb61/primary.jpg', 'id': 'd1d564dd-d133-4652-966e-f78c2211eb61', 'activity': 'playing basketball'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/59e8db9d-0826-4525-95e2-91ae5f4c7283/primary.jpg', 'id': '59e8db9d-0826-4525-95e2-91ae5f4c7283', 'activity': 'riding a bicycle'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/6d2b4a04-3f38-4bbe-a1ef-140070f0eba7/primary.jpg', 'id': '6d2b4a04-3f38-4bbe-a1ef-140070f0eba7', 'activity': 'reading a book'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9/primary.jpg', 'id': 'd1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9', 'activity': 'playing the piano'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/ef71099e-d71c-41e8-bbf8-6ba6708394b1/primary.jpg', 'id': 'ef71099e-d71c-41e8-bbf8-6ba6708394b1', 'activity': 'cooking in the kitchen'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/feedc29e-83bb-436f-8818-87ffd3c494a2/primary.jpg', 'id': 'feedc29e-83bb-436f-8818-87ffd3c494a2', 'activity': 'flying a kite'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/e0448ba5-946a-4e15-a21c-8a1c4459bbbe/primary.jpg', 'id': 'e0448ba5-946a-4e15-a21c-8a1c4459bbbe', 'activity': 'playing tennis'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/be383f1f-38cd-4f34-911b-ac435982fbef/primary.jpg', 'id': 'be383f1f-38cd-4f34-911b-ac435982fbef', 'activity': 'swimming in a pool'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/a30d68b2-c1ab-4294-b0d3-66f257fc67b3/primary.jpg', 'id': 'a30d68b2-c1ab-4294-b0d3-66f257fc67b3', 'activity': 'watering flowers'}]
+INFO 2024-12-07 06:40:31,838 views Retrieved 9 images for dataset 5cafcd75-09ef-4cf5-9c32-7217d73c5068
+INFO 2024-12-07 06:40:31,839 views Image data: [{'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1d564dd-d133-4652-966e-f78c2211eb61/primary.jpg', 'id': 'd1d564dd-d133-4652-966e-f78c2211eb61', 'activity': 'playing basketball'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/59e8db9d-0826-4525-95e2-91ae5f4c7283/primary.jpg', 'id': '59e8db9d-0826-4525-95e2-91ae5f4c7283', 'activity': 'riding a bicycle'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/6d2b4a04-3f38-4bbe-a1ef-140070f0eba7/primary.jpg', 'id': '6d2b4a04-3f38-4bbe-a1ef-140070f0eba7', 'activity': 'reading a book'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9/primary.jpg', 'id': 'd1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9', 'activity': 'playing the piano'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/ef71099e-d71c-41e8-bbf8-6ba6708394b1/primary.jpg', 'id': 'ef71099e-d71c-41e8-bbf8-6ba6708394b1', 'activity': 'cooking in the kitchen'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/feedc29e-83bb-436f-8818-87ffd3c494a2/primary.jpg', 'id': 'feedc29e-83bb-436f-8818-87ffd3c494a2', 'activity': 'flying a kite'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/e0448ba5-946a-4e15-a21c-8a1c4459bbbe/primary.jpg', 'id': 'e0448ba5-946a-4e15-a21c-8a1c4459bbbe', 'activity': 'playing tennis'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/be383f1f-38cd-4f34-911b-ac435982fbef/primary.jpg', 'id': 'be383f1f-38cd-4f34-911b-ac435982fbef', 'activity': 'swimming in a pool'}, {'url': 'https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/a30d68b2-c1ab-4294-b0d3-66f257fc67b3/primary.jpg', 'id': 'a30d68b2-c1ab-4294-b0d3-66f257fc67b3', 'activity': 'watering flowers'}]
+INFO 2024-12-07 06:41:05,731 image_generation Dataset status response: {"datasets_by_pk":{"id":"5cafcd75-09ef-4cf5-9c32-7217d73c5068","createdAt":"2024-12-07T06:38:01","description":null,"name":"user_dataset_8c84f90c","updatedAt":"2024-12-07T06:38:01","dataset_images":[{"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1d564dd-d133-4652-966e-f78c2211eb61/primary.jpg","id":"d1d564dd-d133-4652-966e-f78c2211eb61","createdAt":"2024-12-07T06:39:08.583"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/59e8db9d-0826-4525-95e2-91ae5f4c7283/primary.jpg","id":"59e8db9d-0826-4525-95e2-91ae5f4c7283","createdAt":"2024-12-07T06:38:17.968"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/6d2b4a04-3f38-4bbe-a1ef-140070f0eba7/primary.jpg","id":"6d2b4a04-3f38-4bbe-a1ef-140070f0eba7","createdAt":"2024-12-07T06:38:51.092"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9/primary.jpg","id":"d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9","createdAt":"2024-12-07T06:39:24.49"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/ef71099e-d71c-41e8-bbf8-6ba6708394b1/primary.jpg","id":"ef71099e-d71c-41e8-bbf8-6ba6708394b1","createdAt":"2024-12-07T06:38:35.431"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/feedc29e-83bb-436f-8818-87ffd3c494a2/primary.jpg","id":"feedc29e-83bb-436f-8818-87ffd3c494a2","createdAt":"2024-12-07T06:39:39.061"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/e0448ba5-946a-4e15-a21c-8a1c4459bbbe/primary.jpg","id":"e0448ba5-946a-4e15-a21c-8a1c4459bbbe","createdAt":"2024-12-07T06:39:52.405"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/be383f1f-38cd-4f34-911b-ac435982fbef/primary.jpg","id":"be383f1f-38cd-4f34-911b-ac435982fbef","createdAt":"2024-12-07T06:40:09.926"}, {"url":"https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/a30d68b2-c1ab-4294-b0d3-66f257fc67b3/primary.jpg","id":"a30d68b2-c1ab-4294-b0d3-66f257fc67b3","createdAt":"2024-12-07T06:40:29.485"}]}}
+INFO 2024-12-07 06:41:05,731 image_generation Dataset 5cafcd75-09ef-4cf5-9c32-7217d73c5068 contains 9 images
+INFO 2024-12-07 06:41:05,731 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1d564dd-d133-4652-966e-f78c2211eb61/primary.jpg",
+  "id": "d1d564dd-d133-4652-966e-f78c2211eb61",
+  "createdAt": "2024-12-07T06:39:08.583"
+}
+INFO 2024-12-07 06:41:05,731 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/59e8db9d-0826-4525-95e2-91ae5f4c7283/primary.jpg",
+  "id": "59e8db9d-0826-4525-95e2-91ae5f4c7283",
+  "createdAt": "2024-12-07T06:38:17.968"
+}
+INFO 2024-12-07 06:41:05,731 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/6d2b4a04-3f38-4bbe-a1ef-140070f0eba7/primary.jpg",
+  "id": "6d2b4a04-3f38-4bbe-a1ef-140070f0eba7",
+  "createdAt": "2024-12-07T06:38:51.092"
+}
+INFO 2024-12-07 06:41:05,731 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9/primary.jpg",
+  "id": "d1cbe72f-f62e-46ad-bd99-7aa8fa3d78a9",
+  "createdAt": "2024-12-07T06:39:24.49"
+}
+INFO 2024-12-07 06:41:05,731 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/ef71099e-d71c-41e8-bbf8-6ba6708394b1/primary.jpg",
+  "id": "ef71099e-d71c-41e8-bbf8-6ba6708394b1",
+  "createdAt": "2024-12-07T06:38:35.431"
+}
+INFO 2024-12-07 06:41:05,732 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/feedc29e-83bb-436f-8818-87ffd3c494a2/primary.jpg",
+  "id": "feedc29e-83bb-436f-8818-87ffd3c494a2",
+  "createdAt": "2024-12-07T06:39:39.061"
+}
+INFO 2024-12-07 06:41:05,732 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/e0448ba5-946a-4e15-a21c-8a1c4459bbbe/primary.jpg",
+  "id": "e0448ba5-946a-4e15-a21c-8a1c4459bbbe",
+  "createdAt": "2024-12-07T06:39:52.405"
+}
+INFO 2024-12-07 06:41:05,732 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/be383f1f-38cd-4f34-911b-ac435982fbef/primary.jpg",
+  "id": "be383f1f-38cd-4f34-911b-ac435982fbef",
+  "createdAt": "2024-12-07T06:40:09.926"
+}
+INFO 2024-12-07 06:41:05,732 image_generation Image status: {
+  "url": "https://cdn.leonardo.ai/users/dbc27344-e93d-4c40-8d98-9604ac8fbc78/datasets/5cafcd75-09ef-4cf5-9c32-7217d73c5068/images/a30d68b2-c1ab-4294-b0d3-66f257fc67b3/primary.jpg",
+  "id": "a30d68b2-c1ab-4294-b0d3-66f257fc67b3",
+  "createdAt": "2024-12-07T06:40:29.485"
+}
+INFO 2024-12-07 06:41:05,732 image_generation Dataset check passed: {'status': 'ready', 'image_count': 9}
+INFO 2024-12-07 06:41:05,732 image_generation Starting model training with payload: {
+  "name": "custom_model_1733553665",
+  "description": "Custom character model",
+  "datasetId": "5cafcd75-09ef-4cf5-9c32-7217d73c5068",
+  "modelType": "CHARACTERS",
+  "instance_prompt": "pixar style character",
+  "nsfw": false,
+  "resolution": 512,
+  "sd_version": "v1_5"
+}
+INFO 2024-12-07 06:41:09,436 image_generation Attempt 1: Training response status code: 200
+INFO 2024-12-07 06:41:09,436 image_generation Training response body: {"sdTrainingJob":{"customModelId":"b48f2ec6-5d13-41ee-9205-77bdd2248070","apiCreditCost":750}}
+INFO 2024-12-07 06:41:09,436 image_generation Successfully extracted model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:09,441 views Model training started for user pinkhair123
+INFO 2024-12-07 06:41:09,616 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:09,616 views Initial training status for model b48f2ec6-5d13-41ee-9205-77bdd2248070: PENDING
+INFO 2024-12-07 06:41:09,628 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:09,783 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:09,783 views Retrieved status: PENDING
+INFO 2024-12-07 06:41:09,802 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:09,802 views Training status check 1/60 for model b48f2ec6-5d13-41ee-9205-77bdd2248070: PENDING
+INFO 2024-12-07 06:41:15,019 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:15,165 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:15,166 views Retrieved status: PENDING
+INFO 2024-12-07 06:41:21,017 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:21,174 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:21,174 views Retrieved status: PENDING
+INFO 2024-12-07 06:41:27,020 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:27,188 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:27,189 views Retrieved status: PENDING
+INFO 2024-12-07 06:41:33,018 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:33,169 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:33,170 views Retrieved status: PENDING
+INFO 2024-12-07 06:41:39,017 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:39,169 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:39,169 views Retrieved status: PENDING
+INFO 2024-12-07 06:41:39,968 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:39,969 views Training status check 2/60 for model b48f2ec6-5d13-41ee-9205-77bdd2248070: PENDING
+INFO 2024-12-07 06:41:45,017 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:45,169 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:45,169 views Retrieved status: PENDING
+INFO 2024-12-07 06:41:51,018 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:51,158 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:51,159 views Retrieved status: PENDING
+INFO 2024-12-07 06:41:57,019 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:41:57,185 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:41:57,185 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:03,019 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:03,184 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:03,184 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:09,018 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:09,167 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:09,168 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:10,283 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:10,284 views Training status check 3/60 for model b48f2ec6-5d13-41ee-9205-77bdd2248070: PENDING
+INFO 2024-12-07 06:42:15,019 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:15,178 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:15,179 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:21,017 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:21,192 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:21,192 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:27,018 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:27,188 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:27,189 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:33,016 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:33,171 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:33,171 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:39,017 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:39,160 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:39,160 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:40,449 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:40,450 views Training status check 4/60 for model b48f2ec6-5d13-41ee-9205-77bdd2248070: PENDING
+INFO 2024-12-07 06:42:45,019 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:45,199 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:45,200 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:51,019 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:51,153 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:51,154 views Retrieved status: PENDING
+INFO 2024-12-07 06:42:57,019 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:42:57,190 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:42:57,191 views Retrieved status: PENDING
+INFO 2024-12-07 06:43:03,018 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:43:03,184 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: PENDING
+INFO 2024-12-07 06:43:03,185 views Retrieved status: PENDING
+INFO 2024-12-07 06:43:09,019 views Checking status for model ID: b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 06:43:09,165 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: COMPLETE
+INFO 2024-12-07 06:43:09,166 views Retrieved status: COMPLETE
+ERROR 2024-12-07 06:43:09,188 views Error in trained_model_view: Reverse for 'model_training_progress' not found. 'model_training_progress' is not a valid view function or pattern name.
+INFO 2024-12-07 06:43:10,619 image_generation Model b48f2ec6-5d13-41ee-9205-77bdd2248070 status: COMPLETE
+INFO 2024-12-07 06:43:10,623 views Training status check 5/60 for model b48f2ec6-5d13-41ee-9205-77bdd2248070: COMPLETE
+INFO 2024-12-07 06:43:10,636 views Model training complete for b48f2ec6-5d13-41ee-9205-77bdd2248070
+INFO 2024-12-07 07:22:38,956 autoreload /Users/tanhao/Documents/dev/AI-Visual-Diary/myproject/image_generator/views.py changed, reloading.
+INFO 2024-12-07 07:22:40,577 autoreload Watching for file changes with StatReloader

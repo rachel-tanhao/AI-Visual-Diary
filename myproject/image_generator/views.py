@@ -40,21 +40,21 @@ def home(request):
     username = request.session.get('username')
     
     if not username:
-        # 如果没有用户名，重定向到登录页面
         return redirect('image_generator:initial')
         
     try:
         user_model = UserCustomModel.objects.get(username=username)
         model_status = user_model.model_status
         model_id = user_model.model_id
-        request.session['trained_model_id'] = model_id  # 保存模型ID到session
+        request.session['trained_model_id'] = model_id
     except UserCustomModel.DoesNotExist:
         model_status = None
         model_id = None
     
     return render(request, 'image_generator/home.html', {
         'model_status': model_status,
-        'model_id': model_id
+        'model_id': model_id,
+        'username': username
     })
 
 def initial_user_flow(request):
@@ -417,7 +417,7 @@ def create_user_dataset_view(request, selected_image_id):
         }
         request.session.modified = True
         
-        # 在后台线程中开始数据集��建
+        # 在后台线程中开始数据集创建
         thread = threading.Thread(
             target=create_dataset_background,
             args=(request.session.session_key, dataset_name, selected_image_id, describe_user)

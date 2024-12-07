@@ -25,4 +25,27 @@
         {% endif %}
     </div>
 </div>
+
+{% if model_status == 'TRAINING' %}
+<script>
+    // 每5秒检查一次模型状态
+    function checkModelStatus() {
+        fetch('/check-model-status/{{ model_id }}/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' && data.training_status === 'COMPLETE') {
+                    // 如果模型训练完成，刷新页面
+                    window.location.reload();
+                } else if (data.status === 'success' && data.training_status === 'TRAINING') {
+                    // 如果还在训练，继续检查
+                    setTimeout(checkModelStatus, 5000);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // 开始检查
+    checkModelStatus();
+</script>
+{% endif %}
 {% endblock %}

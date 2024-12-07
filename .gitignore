@@ -14,3 +14,4 @@ __pycache__/
 
 
 .DS_Store
+myproject/debug.log
