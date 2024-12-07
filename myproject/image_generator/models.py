@@ -29,8 +29,9 @@ class GeneratedImage(models.Model):
 
 class UserProfile(models.Model):
     username = models.CharField(max_length=30, unique=True)
-    description = models.TextField(max_length=255, blank=True, null=True)  # 允许为空
-    created_at = models.DateTimeField(default=timezone.now)  # 使用默认值而不是 auto_now_add
+    description = models.TextField(max_length=255, blank=True, null=True)
+    seed_image_id = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
     
     def __str__(self):
         return self.username

@@ -23,7 +23,6 @@ import requests
 import os
 import logging
 import json
-from django.http import JsonResponse
 import threading
 import time
 from django.contrib import messages
@@ -311,28 +310,42 @@ def generate_avatars(request):
 
 
 def select_image(request, generation_id):
+    """Handle image selection"""
     if request.method == 'POST':
-        # Debug print all POST data
-        print("POST data:", request.POST)
-        
-        selected_image_id = request.POST.get('image_id')
-        print("Raw selected_image_id:", selected_image_id)
-        
-        if selected_image_id:
-            request.session['selected_image_id'] = selected_image_id
-            print(f"Stored image ID in session: {selected_image_id}")
+        try:
+            selected_image_id = request.POST.get('image_id')
+            username = request.session.get('username')
             
-            # Instead of redirecting to home, let's show a success page
-            return render(request, 'image_generator/selection_success.html', {
-                'selected_image_id': selected_image_id,
-                'generation_id': generation_id
-            })
-        else:
-            print("No image_id found in POST data")
-    else:
-        print("Request method was not POST")
+            if selected_image_id and username:
+                # 更新 UserProfile
+                user_profile = UserProfile.objects.get(username=username)
+                user_profile.seed_image_id = selected_image_id  # 保存 seed_image_id
+                user_profile.save()
+                
+                logger.info(f"Updated user profile with seed_image_id: {selected_image_id}")
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Image selected successfully'
+                })
+            
+        except UserProfile.DoesNotExist:
+            logger.error(f"User profile not found for username: {username}")
+            return JsonResponse({
+                'status': 'error',
+                'message': 'User profile not found'
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Error selecting image: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
     
-    return redirect('display_generated_images', generation_id=generation_id)
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request'
+    }, status=400)
 
 
 ########## use selected avatar to create a dataset ##############
@@ -340,8 +353,30 @@ def select_image(request, generation_id):
 def create_user_dataset_view(request, selected_image_id):
     """初始化数据集创建过程"""
     if request.method == 'POST':
-        # 获取用描述
+        # 获取用户名和描述
+        username = request.session.get('username')
         describe_user = request.session.get('describe_user', '')
+        
+        if not username:
+            logger.error("No username found in session")
+            messages.error(request, "Please log in first")
+            return redirect('image_generator:home')
+            
+        # 更新用户配置文件中的 seed_image_id
+        try:
+            user_profile = UserProfile.objects.get(username=username)
+            user_profile.seed_image_id = selected_image_id
+            user_profile.save()
+            logger.info(f"Updated user profile with seed_image_id: {selected_image_id}")
+        except UserProfile.DoesNotExist:
+            logger.error(f"User profile not found for username: {username}")
+            messages.error(request, "User profile not found")
+            return redirect('image_generator:home')
+        except Exception as e:
+            logger.error(f"Error updating user profile: {str(e)}")
+            messages.error(request, "Error updating user profile")
+            return redirect('image_generator:home')
+        
         dataset_name = f"user_dataset_{selected_image_id[:8]}"
         
         # 初始化进度信息
@@ -367,7 +402,6 @@ def create_user_dataset_view(request, selected_image_id):
         })
     
     return redirect('image_generator:home')
-
 
 
 def create_dataset_background(session_key, dataset_name, seed_image_id, describe_user):
@@ -524,7 +558,7 @@ def train_model_view(request, dataset_id):
         if training_info:
             model_id = training_info['model_id']
             
-            # 使用 update_or_create 而不是 create
+            # 用 update_or_create 而不是 create
             UserCustomModel.objects.update_or_create(
                 username=username,  # 查找条件
                 defaults={         # 要更新的字段
@@ -671,6 +705,7 @@ def dataset_complete(request, dataset_id):
     })
 
 
+
 def generate_with_model(request, model_id):
     """Generate images using trained model"""
     try:
@@ -678,13 +713,12 @@ def generate_with_model(request, model_id):
         data = json.loads(request.body)
         scenes = data.get('scenes', [])
         
-        describe_user = request.session.get('describe_user', '')
-        logger.info(f"Retrieved describe_user from session: {describe_user}")
-        
-        if not scenes:
+        # 获取用户名
+        username = request.session.get('username')
+        if not username:
             return JsonResponse({
                 'status': 'error',
-                'message': 'No scenes provided'
+                'message': 'User not found'
             })
         
         # 创建新的数据集
@@ -698,10 +732,10 @@ def generate_with_model(request, model_id):
                 'message': 'Failed to create dataset'
             })
         
-        # 启动后台线程生成图片
+        # 启动后台线程生成图片，传入 username
         thread = threading.Thread(
             target=generate_images_background,
-            args=(scenes, dataset_id, describe_user, model_id)  # 添加 model_id
+            args=(scenes, dataset_id, model_id, username)  # 修改参数顺序
         )
         thread.start()
         
@@ -722,20 +756,25 @@ def generate_with_model(request, model_id):
 def display_diary_scenes(request, dataset_id):
     """Display generated diary scenes with progress tracking"""
     try:
-        # 获取场景列表
+        # 获取场景列表，保持原始顺序
         scenes = request.session.get('generated_scenes', [])
+        logger.info(f"Number of scenes from session: {len(scenes)}")
         
-        # 获取数据集中的图片
+        # 获取数据集中的图片，假设图片顺序与生成顺序一致
         dataset_images = display_all_images_in_dataset(dataset_id)
+        logger.info(f"Number of dataset images: {len(dataset_images)}")
         
-        # 准备场景和图片的映射
+        # 按顺序将场景和图片配对
         scene_images = []
         for i, scene in enumerate(scenes):
             image_url = dataset_images[i]['url'] if i < len(dataset_images) else ''
             scene_images.append({
                 'scene': scene,
-                'image_url': image_url
+                'image_url': image_url,
+                'index': i  # 添加索引
             })
+        
+        logger.info(f"Final scene_images length: {len(scene_images)}")
         
         return render(request, 'image_generator/display_diary_scenes.html', {
             'scene_images': scene_images,
@@ -747,39 +786,116 @@ def display_diary_scenes(request, dataset_id):
         messages.error(request, 'Error displaying scenes')
         return redirect('image_generator:upload_diary')
 
+# 真的
+# def generate_images_background(scenes, dataset_id, describe_user, model_id):
+#     """Background task to generate images"""
+#     try:
+#         logger.info(f"Starting background generation for {len(scenes)} scenes")
+#         for scene in scenes:
+#             try:
+#                 # 生成完整提示词
+#                 # full_prompt = f"Highly detailed 3D Disney Pixar-style animation of {describe_user}, {scene}."
+#                 full_prompt = f"VEF7 {scene}, 3D Disney Pixar-style"
+                
+#                 # 生成图片
+#                 generation_id = generate_with_custom_model(model_id, full_prompt)
+#                 logger.info(f"Generated image with ID: {generation_id} for scene: {scene}, with the prompt: {full_prompt}")
+                
+#                 if generation_id:
+#                     # 等待生成完成
+#                     while True:
+#                         status = check_generation_status(generation_id)
+#                         if status == 'COMPLETE':
+#                             break
+#                         time.sleep(2)
+                    
+#                     # 获取生成的图片ID并上传到数据集
+#                     image_ids = get_generated_image_ids(generation_id)
+#                     for image_id in image_ids:
+#                         upload_success = upload_image_to_dataset(dataset_id, image_id)
+#                         logger.info(f"Uploaded image {image_id} to dataset {dataset_id}: {upload_success}")
+                
+#             except Exception as e:
+#                 logger.error(f"Error generating scene '{scene}': {str(e)}")
+                
+#     except Exception as e:
+#         logger.error(f"Critical error in background generation: {str(e)}")
 
-def generate_images_background(scenes, dataset_id, describe_user, model_id):
+
+#备用的
+def generate_images_background(scenes, dataset_id, model_id, username):
     """Background task to generate images"""
     try:
         logger.info(f"Starting background generation for {len(scenes)} scenes")
-        for scene in scenes:
+        logger.info(f"Username: {username}, Dataset ID: {dataset_id}, Model ID: {model_id}")
+        
+        try:
+            user_profile = UserProfile.objects.get(username=username)
+            describe_user = user_profile.description
+            seed_image_id = user_profile.seed_image_id
+            
+            logger.info(f"User profile found - Description: {describe_user}, Seed Image ID: {seed_image_id}")
+                
+        except UserProfile.DoesNotExist:
+            logger.error(f"User profile not found for username: {username}")
+            return
+
+        # 创建一个列表来存储所有生成的图片ID和它们的顺序
+        generated_images = []
+
+        # 首先生成所有图片
+        for index, scene in enumerate(scenes):
             try:
-                # 生成完整提示词
-                full_prompt = f"Highly detailed 3D Disney Pixar-style animation of {describe_user}, {scene}. Disney, Pixar art style, CGI, high details, 3d animation."
+                full_prompt = f"Highly detailed 3D Disney Pixar-style animation of {describe_user}, {scene}. Disney, Pixar art style, CGI, clean background, high details, 3d animation."
+                logger.info(f"Generating scene {index}: {scene}")
+                logger.info(f"Using prompt: {full_prompt}")
                 
-                # 生成图片
-                generation_id = generate_with_custom_model(model_id, full_prompt)
-                logger.info(f"Generated image with ID: {generation_id} for scene: {scene}")
-                
-                if generation_id:
-                    # 等待生成完成
-                    while True:
-                        status = check_generation_status(generation_id)
-                        if status == 'COMPLETE':
-                            break
-                        time.sleep(2)
+                generation_id = generate_with_image_id(seed_image_id, full_prompt, 1)
+                if not generation_id:
+                    logger.error(f"Failed to generate image for scene {index}: {scene}")
+                    continue
                     
-                    # 获取生成的图片ID并上传到数据集
-                    image_ids = get_generated_image_ids(generation_id)
-                    for image_id in image_ids:
-                        upload_success = upload_image_to_dataset(dataset_id, image_id)
-                        logger.info(f"Uploaded image {image_id} to dataset {dataset_id}: {upload_success}")
+                logger.info(f"Generated image with ID: {generation_id}")
+                
+                # 等待生成完成
+                while True:
+                    status = check_generation_status(generation_id)
+                    logger.info(f"Generation status for scene {index}: {status}")
+                    if status == 'COMPLETE':
+                        break
+                    time.sleep(2)
+                
+                # 获取生成的图片ID
+                image_ids = get_generated_image_ids(generation_id)
+                logger.info(f"Got image IDs for scene {index}: {image_ids}")
+                
+                # 存储图片ID和它的索引
+                for image_id in image_ids:
+                    generated_images.append({
+                        'index': index,
+                        'image_id': image_id,
+                        'scene': scene
+                    })
                 
             except Exception as e:
-                logger.error(f"Error generating scene '{scene}': {str(e)}")
+                logger.error(f"Error generating scene {index} '{scene}': {str(e)}")
+                logger.exception("Full traceback:")
+
+        # 按索引排序
+        generated_images.sort(key=lambda x: x['index'])
+        
+        # 按顺序上传到数据集
+        for image_data in generated_images:
+            try:
+                upload_success = upload_image_to_dataset(dataset_id, image_data['image_id'])
+                logger.info(f"Upload result for scene {image_data['index']} ({image_data['scene']}): {upload_success}")
+            except Exception as e:
+                logger.error(f"Error uploading image for scene {image_data['index']}: {str(e)}")
                 
     except Exception as e:
         logger.error(f"Critical error in background generation: {str(e)}")
+        logger.exception("Full traceback:")
+
 
 def view_generated_scenes(request):
     """Display generated scenes"""
@@ -828,6 +944,7 @@ def trained_model_view(request, model_id):
         messages.error(request, '发生错误')
         return redirect('image_generator:home')
 
+
 def extract_text_view(request):
     """Extract text from uploaded diary image"""
     try:
@@ -863,6 +980,7 @@ def extract_text_view(request):
             'message': str(e)
         }, status=500)
 
+
 def generate_scenes_view(request):
     """Generate scenes from diary text"""
     try:
@@ -892,6 +1010,7 @@ def generate_scenes_view(request):
             'message': str(e)
         }, status=500)
 
+
 def logout_view(request):
     """Handle user logout"""
     if request.method == 'POST':
@@ -899,6 +1018,7 @@ def logout_view(request):
         request.session.flush()
         messages.success(request, "You have been logged out successfully!")
     return redirect('image_generator:initial')
+
 
 def check_dataset_progress(request, dataset_id):
     """检查数据集中的图片生成进度"""
@@ -919,6 +1039,7 @@ def check_dataset_progress(request, dataset_id):
             'status': 'error',
             'message': str(e)
         }, status=500)
+
 
 def get_dataset_images(request, dataset_id):
     """获取数据集中的图片URL"""

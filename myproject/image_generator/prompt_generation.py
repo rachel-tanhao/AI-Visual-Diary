@@ -22,13 +22,14 @@ def process_diary_text(diary_text):
 
             **Your Task:**  
             - Break down the given diary entry into a list of short, activity-based phrases.  
-            - Each phrase should take the writer of the diary as the subject and depict a distinct action or activity of him/her.  
-            - Avoid full sentences, connective words, and unnecessary details.  
-            - Focus on creating prompts suitable for image generation.
+            - Each phrase should:  
+            1. Include a clear sense of **emotion** or **atmosphere** (e.g., “laughing under a sky full of stars”).  
+            2. Highlight **dynamic actions** (e.g., “spinning,” “reaching,” “dancing”).  
+            3. Emphasize **interaction** with other people, objects, or the environment if mentioned (e.g., “sharing a slice of cake under fairy lights”).  
 
             **Format:**  
-            - Output a list of phrases, each on its own line.
-            - Do not include numbering or bullet points.
+            - Output a list of phrases, each on its own line.  
+            - Do not include numbering or bullet points.  
 
             **Few-Shot Examples:**
 
@@ -37,22 +38,23 @@ def process_diary_text(diary_text):
             "I woke up early and went for a morning jog. Then I returned home and baked some bread. In the afternoon, I sat under an old oak tree and read a book."
 
             Desired Output:
-            "jogging through early morning light"  
-            "kneading fresh dough in a cozy kitchen"  
-            "reading quietly beneath a sprawling oak tree"
+            "leaping over puddles during a sunrise jog, the air crisp and cool"  
+            "pulling golden bread from a warm oven, steam curling into the air"  
+            "reading quietly beneath a sprawling oak tree, sunlight dappling the pages"
 
             **Example 2:**
             Input Diary Entry:
             "After breakfast, I went cycling along the river. Later, I painted a watercolor landscape on my balcony. In the evening, I listened to jazz in a dimly lit café."
 
             Desired Output:
-            "cycling beside a calm riverbank"  
-            "brushing gentle colors onto paper"  
-            "sipping coffee with soft jazz tunes"
+            "speeding along a riverbank with wind in my hair, the water glimmering beside me"  
+            "sweeping a paintbrush over paper, colors blending under soft sunlight"  
+            "swaying gently to jazz music in a cozy, dim-lit café, a steaming coffee nearby"
 
             **Now, please apply the same style and process to the following diary entry:**
 
             {diary_text}
+
         """
         
         response = model.generate_content(prompt)

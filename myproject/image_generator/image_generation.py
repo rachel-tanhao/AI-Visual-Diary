@@ -130,11 +130,17 @@ def generate_with_image_id(seed_image_id, prompt, num_images):
         "prompt": prompt,
         "width": 1024,
         "controlnets": [
+                # {
+                #     "initImageId": seed_image_id,
+                #     "initImageType": "GENERATED",
+                #     "preprocessorId": 133, # character reference
+                #     "strengthType": "Low",
+                # },
               {
                   "initImageId": seed_image_id,
                   "initImageType": "GENERATED",
                   "preprocessorId": 67, #Style Reference Id
-                  "strengthType": "High",
+                  "strengthType": "Low",
               }
           ]
     }
@@ -290,7 +296,7 @@ def train_custom_model(dataset_id, describe_user, max_retries=3):
         "description": describe_user,
         "datasetId": dataset_id,
         "modelType": "GENERAL",
-        "instance_prompt": "a pixar style character", 
+        "instance_prompt": "VEF7 character", 
         "nsfw": False,
     }
     

@@ -35,9 +35,9 @@
         <div id="scenesCarousel" class="carousel slide" data-bs-ride="false">
             <div class="carousel-inner">
                 {% for item in scene_images %}
-                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="carousel-item {% if forloop.first %}active{% endif %}" data-scene-index="{{ forloop.counter0 }}">
                     <div class="card">
-                        <img src="{{ item.image_url }}" class="d-block w-100" alt="Scene image">
+                        <img src="{{ item.image_url }}" class="d-block w-100" alt="Scene {{ forloop.counter }}" data-image-index="{{ forloop.counter0 }}">
                         <div class="card-body">
                             <p class="card-text text-center">{{ item.scene }}</p>
                             <div class="scene-counter text-center text-muted">
@@ -144,51 +144,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Update status text
                 const statusText = document.getElementById('statusText');
-                statusText.textContent = `Generated ${currentImages} of ${totalScenes} images...`;
+                statusText.textContent = `Generated ${currentImages} of ${totalScenes} images (${progress}%)...`;
                 
                 // Add log message
                 const logMessages = document.getElementById('logMessages');
-                logMessages.innerHTML += `<div>[${new Date().toLocaleTimeString()}] Generated image ${currentImages} of ${totalScenes}</div>`;
+                logMessages.innerHTML += `<div>[${new Date().toLocaleTimeString()}] Progress: ${currentImages}/${totalScenes} (${progress}%)</div>`;
                 logMessages.scrollTop = logMessages.scrollHeight;
                 
-                // Check if generation is complete
                 if (currentImages === totalScenes) {
-                    // 添加完成消息
-                    const logMessages = document.getElementById('logMessages');
                     logMessages.innerHTML += `<div class="text-success">[${new Date().toLocaleTimeString()}] All images generated successfully!</div>`;
                     
-                    // 获取最新的图片URL
-                    fetch(`/get-dataset-images/${datasetId}/`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const carousel = document.getElementById('scenesCarousel');
-                            const images = carousel.getElementsByTagName('img');
-                            data.images.forEach((imageData, index) => {
-                                if (images[index]) {
-                                    images[index].src = imageData.url;
+                    setTimeout(() => {
+                        fetch(`/get-dataset-images/${datasetId}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success' && data.images) {
+                                    // 按索引更新图片
+                                    data.images.forEach((imageData, index) => {
+                                        const img = document.querySelector(`img[data-image-index="${index}"]`);
+                                        if (img) {
+                                            img.src = imageData.url;
+                                        }
+                                    });
+                                    
+                                    setTimeout(() => {
+                                        document.getElementById('progressSection').style.display = 'none';
+                                        document.getElementById('imagesGrid').style.display = 'block';
+                                    }, 2000);
                                 }
                             });
-                            
-                            setTimeout(() => {
-                                document.getElementById('progressSection').style.display = 'none';
-                                document.getElementById('imagesGrid').style.display = 'block';
-                            }, 1500);
-                        });
+                    }, 3000);
                 } else {
-                    setTimeout(updateProgress, 3000);
+                    setTimeout(updateProgress, 5000);
                 }
             })
             .catch(error => {
                 console.error('Error checking progress:', error);
                 const logMessages = document.getElementById('logMessages');
                 logMessages.innerHTML += `<div class="text-danger">[${new Date().toLocaleTimeString()}] Error: ${error.message}</div>`;
+                setTimeout(updateProgress, 5000);
             });
     }
     
     // Start progress monitoring
     updateProgress();
 
-    // 添加键盘导航
+    // Keyboard navigation
     document.addEventListener('keydown', function(e) {
         const carousel = document.getElementById('scenesCarousel');
         if (carousel) {

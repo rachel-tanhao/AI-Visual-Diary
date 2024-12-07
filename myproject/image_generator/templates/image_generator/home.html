@@ -2,49 +2,88 @@
 {% load static %}
 
 {% block content %}
-<div class="container text-center">
-    <h1 class="display-4 mb-4">Welcome to AI Visual Diary</h1>
-    
-    <div id="modelStatus" class="mb-4">
-        {% if model_status == 'COMPLETE' %}
-            <div class="alert alert-success">
-                <h4>Your Custom Model is Ready!</h4>
-                <p>Model ID: {{ model_id }}</p>
-                <a href="{% url 'image_generator:upload_diary' %}" class="btn btn-lg custom-btn-green">
-                    Upload Your Diary
-                </a>
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="display-4 mb-4">
+                <span style="color: var(--primary-color)">Welcome to</span>
+                <br>
+                My Magic Diary! ✨
+            </h1>
+            
+            <p class="lead mb-5">
+                Turn your handwritten stories into magical illustrations!
+            </p>
+
+            <div class="card p-4 mb-5">
+                <div id="modelStatus">
+                    {% if model_status == 'COMPLETE' %}
+                        <div class="text-center">
+                            <i class="fas fa-wand-magic-sparkles fa-4x mb-4" style="color: var(--primary-color)"></i>
+                            <h3 class="mb-3">Your Magic Wand is Ready! 🪄</h3>
+                            <p class="mb-4">Let's turn your diary into beautiful pictures!</p>
+                            <a href="{% url 'image_generator:upload_diary' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-book-open me-2"></i>Start Your Story
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center">
+                            <i class="fas fa-palette fa-4x mb-4" style="color: var(--secondary-color)"></i>
+                            <h3 class="mb-3">Let's Create Your Character! 🎨</h3>
+                            <p class="mb-4">First, we'll make a special character just for you!</p>
+                            <a href="{% url 'image_generator:generate_avatars' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic me-2"></i>Create Your Character
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        {% else %}
-            <div class="alert alert-warning">
-                <h4>No Custom Model Found</h4>
-                <p>Please start by creating your character.</p>
-                <a href="{% url 'image_generator:generate_avatars' %}" class="btn btn-lg custom-btn-blue">
-                    Create Your Character
-                </a>
+
+            <div class="how-it-works">
+                <h3 class="mb-4">How It Works 🤔</h3>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 p-3">
+                            <i class="fas fa-pencil-alt fa-2x mb-3" style="color: var(--primary-color)"></i>
+                            <h5>Write Your Story</h5>
+                            <p>Write your diary entry just like you always do!</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 p-3">
+                            <i class="fas fa-camera fa-2x mb-3" style="color: var(--secondary-color)"></i>
+                            <h5>Take a Picture</h5>
+                            <p>Snap a photo of your diary page</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 p-3">
+                            <i class="fas fa-star fa-2x mb-3" style="color: var(--accent-color)"></i>
+                            <h5>See the Magic</h5>
+                            <p>Watch your story come to life with pictures!</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        {% endif %}
+        </div>
     </div>
 </div>
 
 {% if model_status == 'TRAINING' %}
 <script>
-    // 每5秒检查一次模型状态
     function checkModelStatus() {
         fetch('/check-model-status/{{ model_id }}/')
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success' && data.training_status === 'COMPLETE') {
-                    // 如果模型训练完成，刷新页面
                     window.location.reload();
                 } else if (data.status === 'success' && data.training_status === 'TRAINING') {
-                    // 如果还在训练，继续检查
                     setTimeout(checkModelStatus, 5000);
                 }
             })
             .catch(error => console.error('Error:', error));
     }
 
-    // 开始检查
     checkModelStatus();
 </script>
 {% endif %}
