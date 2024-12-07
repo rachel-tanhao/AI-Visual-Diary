@@ -1,13 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-</head>
-<body>
-    <h1>Welcome to the AI Visual Diary</h1>
-    <p>Upload your diary images to generate visual content!</p>
-    <a href="{% url 'image_generator:upload_diary' %}">Upload Diary</a>
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container text-center">
+    <h1 class="display-4 mb-4">Welcome to AI Visual Diary</h1>
+    
+    <div id="modelStatus" class="mb-4">
+        {% if model_status == 'COMPLETE' %}
+            <div class="alert alert-success">
+                <h4>Your Custom Model is Ready!</h4>
+                <p>Model ID: {{ model_id }}</p>
+                <a href="{% url 'image_generator:upload_diary' %}" class="btn btn-lg custom-btn-green">
+                    Upload Your Diary
+                </a>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <h4>No Custom Model Found</h4>
+                <p>Please start by creating your character.</p>
+                <a href="{% url 'image_generator:generate_avatars' %}" class="btn btn-lg custom-btn-blue">
+                    Create Your Character
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

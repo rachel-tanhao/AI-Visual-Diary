@@ -4,7 +4,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CRE
 
 # from https://cloud.google.com/vision/docs/handwriting?hl=zh-cn
 def detect_document(path):
-    """Detects document features in an image."""
+    """从图片中提取文字"""
     from google.cloud import vision
 
     client = vision.ImageAnnotatorClient()
@@ -54,6 +54,7 @@ def format_paragraph(words):
 
 
 def parse_diary(image_path):
+    """主函数，调用上述两个函数处理日记图片"""
     words = detect_document(image_path)
     extracted_text = format_paragraph(words)
     return extracted_text

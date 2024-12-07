@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-5">
+            <h2 class="text-center mb-4">Training Your Custom Model</h2>
+            
+            <div class="progress mb-4" style="height: 25px;">
+                <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" style="width: 0%">
+                    <span id="progress-text">0%</span>
+                </div>
+            </div>
+            
+            <div class="text-center mb-4">
+                <h5>Status: <span id="training-status" class="badge bg-info">Initializing...</span></h5>
+                <p id="status-message" class="text-muted">Starting model training...</p>
+            </div>
+            
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">Training Logs</h6>
+                    <div id="log-container" class="small" style="max-height: 200px; overflow-y: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function checkTrainingStatus() {
+    const modelId = '{{ model_id }}';
+    $.get(`/check-model-status/${modelId}/`, function(data) {
+        updateProgressBar(data.status);
+        
+        if (data.status !== 'COMPLETE' && data.status !== 'FAILED') {
+            setTimeout(checkTrainingStatus, 5000);
+        } else if (data.status === 'COMPLETE') {
+            window.location.href = `/trained-model/${modelId}/`;
+        } else {
+            alert('模型训练失败，请重试');
+            window.location.href = "{% url 'image_generator:home' %}";
+        }
+    });
+}
+
+// 开始检查训练状态
+document.addEventListener('DOMContentLoaded', checkTrainingStatus);
+</script>
+{% endblock %}

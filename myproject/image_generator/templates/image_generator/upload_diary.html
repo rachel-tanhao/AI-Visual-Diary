@@ -1,91 +1,188 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Diary</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .upload-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .upload-form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        .file-input-container {
-            position: relative;
-            width: 300px;
-        }
-        .file-input-label {
-            display: inline-block;
-            padding: 12px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .file-input-label:hover {
-            background-color: #45a049;
-        }
-        input[type="file"] {
-            display: none;
-        }
-        button {
-            padding: 12px 30px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #1976D2;
-        }
-        #file-name {
-            margin-top: 10px;
-            color: #666;
-        }
-    </style>
-</head>
-<body>
-    <div class="upload-container">
-        <h1>Upload Your Diary Image</h1>
-        <form method="POST" enctype="multipart/form-data" class="upload-form">
-            {% csrf_token %}
-            <div class="file-input-container">
-                <label for="diary_image" class="file-input-label">Choose Image</label>
-                <input type="file" name="diary_image" id="diary_image" accept="image/*" required>
-                <div id="file-name"></div>
-            </div>
-            <button type="submit">Upload and Extract Text</button>
-        </form>
-    </div>
+{% extends 'base.html' %}
+{% load static %}
 
-    <script>
-        document.getElementById('diary_image').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name || 'No file selected';
-            document.getElementById('file-name').textContent = fileName;
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Your Visual Diary</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    <div class="messages mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Step 1: Upload Image -->
+                    <form id="uploadForm" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="diary_image" class="form-label">Upload Your Diary Page</label>
+                            <input type="file" class="form-control" id="diary_image" name="diary_image" accept="image/*">
+                        </div>
+                        
+                        <div id="imagePreview" class="mb-3" style="display: none;">
+                            <img id="preview" class="img-fluid rounded" alt="Preview">
+                        </div>
+                        
+                        <button type="button" id="extractTextBtn" class="btn btn-primary" style="display: none;">
+                            Extract Text
+                        </button>
+                    </form>
+
+                    <!-- Step 2: Display Extracted Text -->
+                    <div id="extractedTextSection" class="mt-4" style="display: none;">
+                        <h5>Extracted Text:</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <p id="extractedText"></p>
+                            </div>
+                        </div>
+                        <button type="button" id="generateScenesBtn" class="btn btn-success mt-3">
+                            Generate Scenes
+                        </button>
+                    </div>
+
+                    <!-- Step 3: Display Generated Scenes -->
+                    <div id="scenesSection" class="mt-4" style="display: none;">
+                        <h5>Generated Scenes:</h5>
+                        <div id="scenesList" class="list-group mb-3">
+                        </div>
+                        <button type="button" id="generateImagesBtn" class="btn btn-primary">
+                            Generate Images
+                        </button>
+                    </div>
+
+                    <!-- Step 4: Display Generated Images -->
+                    {% if images %}
+                    <div class="mt-4">
+                        <h5>Your Visual Diary:</h5>
+                        <div class="row">
+                            {% for image in images %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <img src="{{ image.url }}" class="card-img-top" alt="Generated scene">
+                                    <div class="card-body">
+                                        <p class="card-text">{{ image.scene }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    const modelId = "{{ model_id }}";
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('diary_image');
+    const imagePreview = document.getElementById('imagePreview');
+    const preview = document.getElementById('preview');
+    const extractTextBtn = document.getElementById('extractTextBtn');
+    const extractedTextSection = document.getElementById('extractedTextSection');
+    const generateScenesBtn = document.getElementById('generateScenesBtn');
+    const scenesSection = document.getElementById('scenesSection');
+    const generateImagesBtn = document.getElementById('generateImagesBtn');
+
+    // Image upload preview
+    imageInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                extractTextBtn.style.display = 'block';
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Extract text
+    extractTextBtn.addEventListener('click', function() {
+        const formData = new FormData();
+        formData.append('diary_image', imageInput.files[0]);
+        
+        fetch('/extract-text/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('extractedText').textContent = data.text;
+            extractedTextSection.style.display = 'block';
         });
-    </script>
-</body>
-</html>
+    });
+
+    // Generate scenes
+    generateScenesBtn.addEventListener('click', function() {
+        const text = document.getElementById('extractedText').textContent;
+        
+        fetch('/generate-scenes/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                diary_text: text
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const scenesList = document.getElementById('scenesList');
+            scenesList.innerHTML = '';
+            data.scenes.forEach(scene => {
+                const div = document.createElement('div');
+                div.className = 'list-group-item';
+                div.textContent = scene;
+                scenesList.appendChild(div);
+            });
+            scenesSection.style.display = 'block';
+        });
+    });
+
+    // Generate images
+    generateImagesBtn.addEventListener('click', function() {
+        const scenes = Array.from(document.querySelectorAll('#scenesList .list-group-item'))
+            .map(item => item.textContent);
+        
+        fetch('/generate-with-model/' + modelId + '/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                scenes: scenes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.href = '/display/' + data.generation_id + '/';
+            } else {
+                alert('Failed to generate images: ' + data.message);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

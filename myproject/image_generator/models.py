@@ -32,3 +32,14 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.username
+
+
+class UserCustomModel(models.Model):
+    username = models.CharField(max_length=30, unique=True)
+    model_id = models.CharField(max_length=100)
+    model_status = models.CharField(max_length=20, default='PENDING')  # PENDING, TRAINING, COMPLETE, FAILED
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.username}'s model: {self.model_id}"

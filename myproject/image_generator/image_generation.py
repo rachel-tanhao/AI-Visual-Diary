@@ -12,8 +12,13 @@ authorization = "Bearer %s" % leonardo_api_key
 logger = logging.getLogger(__name__)
 
 
+############### generate the initial avatar #################
+
 def generate(prompt, num_images):
-    """Generate images based on a prompt using the Leonardo AI API."""
+    """生成初始用户头像
+    在 generate_avatars() view 中被调用
+    返回 generation_id
+    """
     url = "https://cloud.leonardo.ai/api/rest/v1/generations"
     payload = {
         "alchemy": True,
@@ -35,27 +40,11 @@ def generate(prompt, num_images):
     return generation_id
 
 
-def get_generated_image_ids(generation_id):
-    """ Function to retrieve generated image IDs without displaying them """
-    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
-    headers = {
-        "accept": "application/json",
-        "authorization": authorization
-    }
-    # Fetch the generated images
-    response = requests.get(url, headers=headers)
-    response_dict = response.json()
-    # Get the generated image IDs
-    generated_images = response_dict.get('generations_by_pk', {}).get('generated_images', [])
-    image_ids = []
-    for image_data in generated_images:
-        image_id = image_data['id']
-        image_ids.append(image_id)
-    return image_ids
-
-
 def display_images(generation_id):
-    """Fetch generated images and return their data"""
+    """获取生成的图片信息
+    在 display_generated_images() view 中被调用
+    返回包含图片URL的列表
+    """
     url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
     headers = {
         "accept": "application/json",
@@ -88,51 +77,16 @@ def display_images(generation_id):
     return []  # Return empty list if timeout
 
 
-def generate_with_image_id(image_id, prompt, num_images):
-    """ Function: Generate an image based on an image """
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "authorization": authorization
-    }
-
-    # Generate with an image prompt: use Character Reference to control consistency
-    url = "https://cloud.leonardo.ai/api/rest/v1/generations"
-
-    payload = {
-        "alchemy": True,
-        "height": 768,
-        "modelId": "b24e16ff-06e3-43eb-8d33-4416c2d75876",
-        "num_images": num_images,
-        "presetStyle": "DYNAMIC",
-        "prompt": prompt,
-        "width": 1024,
-        "controlnets": [
-              {
-                  "initImageId": image_id,
-                  "initImageType": "GENERATED",
-                  "preprocessorId": 67, #Style Reference Id
-                  "strengthType": "High",
-              }
-          ]
-    }
-
-    response = requests.post(url, json=payload, headers=headers)
-
-    # Print response for debugging
-    print(f"Status code: {response.status_code}")
-    print(f"Response: {response.text}")
-
-    # Get the generation of images
-    generation_id = response.json()['sdGenerationJob']['generationId']
-    return generation_id
 
 
 ################ dataset related functions ##################
 
 
 def create_dataset(name):
-    """Create a new dataset and return its ID"""
+    """创建空数据集
+    在 create_dataset_background() 中被调用
+    返回 dataset_id
+    """
     url = "https://cloud.leonardo.ai/api/rest/v1/datasets"
     headers = {
         "accept": "application/json",
@@ -153,67 +107,154 @@ def create_dataset(name):
     return None
 
 
-def create_user_dataset(dataset_name, seed_image_id, describe_user):
-    """Create a dataset with multiple activity images."""
-    logger.info(f"Starting dataset creation with name: {dataset_name}")
-    
-    dataset_id = create_dataset(dataset_name)
-    if not dataset_id:
-        logger.error("Failed to create dataset")
-        return None
-        
-    logger.info(f"Dataset created successfully with ID: {dataset_id}")
-    
-    activities = [
-        "playing basketball", "riding a bicycle", "reading a book",
-        "playing the piano", "cooking in the kitchen", "flying a kite",
-        "playing tennis", "swimming in a pool", "watering flowers"
-    ]
-    
-    generated_images = []
-    for activity in activities:
-        logger.info(f"Generating image for activity: {activity}")
-        prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation, bright color."
-        
-        generation_id = generate_with_image_id(seed_image_id, prompt, 1)
-        if generation_id:
-            logger.info(f"Generation started with ID: {generation_id}")
-            
-            # Wait for generation to complete
-            generation_response = wait_for_image_generation(generation_id)
-            if generation_response:
-                image_ids = get_generated_image_ids(generation_id)
-                for image_id in image_ids:
-                    if upload_image_to_dataset(dataset_id, image_id):
-                        logger.info(f"Successfully uploaded image {image_id} for activity: {activity}")
-                        generated_images.append({
-                            'activity': activity,
-                            'image_id': image_id
-                        })
-                    else:
-                        logger.error(f"Failed to upload image {image_id} to dataset")
-            else:
-                logger.error(f"Generation failed for activity: {activity}")
-        else:
-            logger.error(f"Failed to start generation for activity: {activity}")
-            
-        # Get current count of images
-        current_count = get_number_of_images_in_dataset(dataset_id)
-        logger.info(f"Current number of images in dataset: {current_count}")
-    
-    return {
-        'dataset_id': dataset_id,
-        'images': generated_images,
-        'total_images': len(generated_images)
+def generate_with_image_id(seed_image_id, prompt, num_images):
+    """基于选定的头像生成其他场景图片
+    在 create_dataset_background() 中被调用
+    返回 generation_id
+    """
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": authorization
     }
 
+    # Generate with an image prompt: use Character Reference to control consistency
+    url = "https://cloud.leonardo.ai/api/rest/v1/generations"
 
-def upload_image_to_dataset(dataset_id, generated_image_id):
-    """Upload a generated image to a specified dataset."""
+    payload = {
+        "alchemy": True,
+        "height": 768,
+        "modelId": "b24e16ff-06e3-43eb-8d33-4416c2d75876",
+        "num_images": num_images,
+        "presetStyle": "DYNAMIC",
+        "prompt": prompt,
+        "width": 1024,
+        "controlnets": [
+              {
+                  "initImageId": seed_image_id,
+                  "initImageType": "GENERATED",
+                  "preprocessorId": 67, #Style Reference Id
+                  "strengthType": "High",
+              }
+          ]
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    # Print response for debugging
+    print(f"Status code: {response.status_code}")
+    print(f"Response: {response.text}")
+
+    # Get the generation of images
+    generation_id = response.json()['sdGenerationJob']['generationId']
+    return generation_id
+
+
+def check_generation_status(generation_id):
+    """检查图片生成状态
+    在 create_dataset_background() 中被调用
+    返回状态（'COMPLETE'/'FAILED'等）
+    """
+    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
+    headers = {
+        "accept": "application/json",
+        "authorization": authorization
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        response_dict = response.json()
+        status = response_dict.get('generations_by_pk', {}).get('status', '')
+        print(f"Current status for generation {generation_id}: {status}")
+        return status
+    return None
+
+
+def get_generated_image_ids(generation_id):
+    """获取生成图片的ID列表
+    在 create_dataset_background() 中被调用
+    返回 image_ids 列表
+    """
+    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
+    headers = {
+        "accept": "application/json",
+        "authorization": authorization
+    }
+    # Fetch the generated images
+    response = requests.get(url, headers=headers)
+    response_dict = response.json()
+    # Get the generated image IDs
+    generated_images = response_dict.get('generations_by_pk', {}).get('generated_images', [])
+    image_ids = []
+    for image_data in generated_images:
+        image_id = image_data['id']
+        image_ids.append(image_id)
+    return image_ids
+
+
+# def create_user_dataset(dataset_name, seed_image_id, describe_user):
+#     """Create a dataset with multiple activity images."""
+#     logger.info(f"Starting dataset creation with name: {dataset_name}")
+    
+#     dataset_id = create_dataset(dataset_name)
+#     if not dataset_id:
+#         logger.error("Failed to create dataset")
+#         return None
+        
+#     logger.info(f"Dataset created successfully with ID: {dataset_id}")
+    
+#     activities = [
+#         "playing basketball", "riding a bicycle", "reading a book",
+#         "playing the piano", "cooking in the kitchen", "flying a kite",
+#         "playing tennis", "swimming in a pool", "watering flowers"
+#     ]
+    
+#     generated_images = []
+#     for activity in activities:
+#         logger.info(f"Generating image for activity: {activity}")
+#         prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation, bright color."
+        
+#         generation_id = generate_with_image_id(seed_image_id, prompt, 1)
+#         if generation_id:
+#             logger.info(f"Generation started with ID: {generation_id}")
+            
+#             # Wait for generation to complete
+#             generation_response = wait_for_image_generation(generation_id)
+#             if generation_response:
+#                 image_ids = get_generated_image_ids(generation_id)
+#                 for image_id in image_ids:
+#                     if upload_image_to_dataset(dataset_id, image_id):
+#                         logger.info(f"Successfully uploaded image {image_id} for activity: {activity}")
+#                         generated_images.append({
+#                             'activity': activity,
+#                             'image_id': image_id
+#                         })
+#                     else:
+#                         logger.error(f"Failed to upload image {image_id} to dataset")
+#             else:
+#                 logger.error(f"Generation failed for activity: {activity}")
+#         else:
+#             logger.error(f"Failed to start generation for activity: {activity}")
+            
+#         # Get current count of images
+#         current_count = get_number_of_images_in_dataset(dataset_id)
+#         logger.info(f"Current number of images in dataset: {current_count}")
+    
+#     return {
+#         'dataset_id': dataset_id,
+#         'images': generated_images,
+#         'total_images': len(generated_images)
+#     }
+
+
+def upload_image_to_dataset(dataset_id, image_id):
+    """将生成的图片上传到数据集
+    在 create_dataset_background() 中被调用
+    返回上传是否成功
+    """
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}/upload/gen"
     
     payload = {
-        "generatedImageId": generated_image_id
+        "generatedImageId": image_id
     }
     
     headers = {
@@ -224,7 +265,7 @@ def upload_image_to_dataset(dataset_id, generated_image_id):
     
     try:
         response = requests.post(url, json=payload, headers=headers, timeout=30)
-        print(f"Upload response for image {generated_image_id}: {response.text}")
+        print(f"Upload response for image {image_id}: {response.text}")
         
         if response.status_code == 200:
             return True
@@ -239,7 +280,10 @@ def upload_image_to_dataset(dataset_id, generated_image_id):
 
 
 def display_all_images_in_dataset(dataset_id):
-    """Display all images in a dataset with their activities."""
+    """显示数据集中的所有图片
+    在 dataset_complete() view 中被调用
+    返回数据集中的所有图片信息
+    """
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}"
     
     headers = {
@@ -295,25 +339,42 @@ def display_all_images_in_dataset(dataset_id):
         logger.error(f"Error displaying dataset images: {str(e)}")
         return []
 
+
 ################ model related functions ##################
 
 
-def train_custom_model(dataset_id, describe_user):
-    """Train a custom model using the specified dataset."""
+def train_custom_model(dataset_id, describe_user, max_retries=3):
+    """训练用户专属模型"""
+    # 首先检查数据集状态
+    dataset_status = check_dataset_status(dataset_id)
+    if not dataset_status:
+        logger.error("Failed to check dataset status")
+        return None
+        
+    if dataset_status['status'] != 'ready':
+        logger.error(f"Dataset not ready. Status: {dataset_status}")
+        return None
+        
+    if dataset_status['image_count'] < 5:  # 假设需要至少5张图片
+        logger.error(f"Not enough images in dataset. Found: {dataset_status['image_count']}")
+        return None
+    
+    logger.info(f"Dataset check passed: {dataset_status}")
+
     url = "https://cloud.leonardo.ai/api/rest/v1/models"
     
-    model_name = f"custom_model_{describe_user}_{int(time.time())}"
-    instance_prompt = f"3D Pixar-style animation of {describe_user}."
+    # 简化模型名称，避免特殊字符
+    model_name = f"custom_model_{int(time.time())}"
     
     payload = {
         "name": model_name,
-        "description": f"Custom model trained for {describe_user}",
+        "description": "Custom character model",
         "datasetId": dataset_id,
         "modelType": "CHARACTERS",
-        "instance_prompt": instance_prompt,
+        "instance_prompt": "pixar style character", 
         "nsfw": False,
-        "resolution": 768,
-        "sd_version": "v2"
+        "resolution": 512,  # 降低分辨率
+        "sd_version": "v1_5"  # 尝试不同的 SD 版本
     }
     
     headers = {
@@ -324,40 +385,54 @@ def train_custom_model(dataset_id, describe_user):
     
     logger.info(f"Starting model training with payload: {json.dumps(payload, indent=2)}")
     
-    try:
-        response = requests.post(url, json=payload, headers=headers)
-        logger.info(f"Training response status code: {response.status_code}")
-        logger.info(f"Training response body: {response.text}")
-        
-        if response.status_code == 200:
-            response_data = response.json()
-            training_job = response_data.get('sdTrainingJob', {})
-            model_id = training_job.get('customModelId')
-            training_id = training_job.get('id')
+    for attempt in range(max_retries):
+        try:
+            # 添加更长的延迟
+            if attempt > 0:
+                time.sleep(15 * (attempt + 1))
             
-            if model_id:
-                logger.info(f"Successfully extracted model ID: {model_id}")
-                return {
-                    'model_id': model_id,
-                    'training_id': training_id
-                }
-            else:
-                logger.error("No model ID found in response")
-                logger.error(f"Full response: {json.dumps(response_data, indent=2)}")
-                return None
+            response = requests.post(url, json=payload, headers=headers)
+            logger.info(f"Attempt {attempt + 1}: Training response status code: {response.status_code}")
+            logger.info(f"Training response body: {response.text}")
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                training_job = response_data.get('sdTrainingJob', {})
+                model_id = training_job.get('customModelId')
+                training_id = training_job.get('id')
                 
-        else:
-            logger.error(f"Failed to start training. Response: {response.text}")
-            return None
+                if model_id:
+                    logger.info(f"Successfully extracted model ID: {model_id}")
+                    return {
+                        'model_id': model_id,
+                        'training_id': training_id
+                    }
+            elif response.status_code == 500:
+                error_msg = response.json().get('error', 'Unknown error')
+                logger.warning(f"Server error on attempt {attempt + 1}: {error_msg}")
+                
+                # 如果是配额或限制相关的错误，立即返回
+                if 'quota' in error_msg.lower() or 'limit' in error_msg.lower():
+                    logger.error("API quota or limit reached")
+                    return None
+                    
+                continue
+                
+        except Exception as e:
+            logger.error(f"Exception during model training attempt {attempt + 1}: {str(e)}")
+            if attempt == max_retries - 1:
+                logger.exception("Final attempt failed. Full traceback:")
+                return None
             
-    except Exception as e:
-        logger.error(f"Exception during model training: {str(e)}")
-        logger.exception("Full traceback:")
-        return None
+    logger.error("All attempts to train model failed")
+    return None
 
 
 def get_model_status(model_id):
-    """Check the status of a model training job."""
+    """检查模型训练状态
+    用于检查模型是否训练完成
+    返回模型状态
+    """
     url = f"https://cloud.leonardo.ai/api/rest/v1/models/{model_id}"
     
     headers = {
@@ -379,7 +454,10 @@ def get_model_status(model_id):
 
 
 def generate_with_custom_model(model_id, prompt, num_images=1):
-    """Generate images using a custom trained model."""
+    """使用训练好的模型生成图片
+    在处理日记场景时使用
+    返回 generation_id
+    """
     url = "https://cloud.leonardo.ai/api/rest/v1/generations"
     
     payload = {
@@ -407,6 +485,7 @@ def generate_with_custom_model(model_id, prompt, num_images=1):
     except Exception as e:
         logger.error(f"Error generating with custom model: {str(e)}")
         return None
+
 
 ################ utils ##################
 
@@ -450,22 +529,6 @@ def format_json_response(response):
     return formatted_response
 
 
-def check_generation_status(generation_id):
-    """Check the status of a generation"""
-    url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
-    headers = {
-        "accept": "application/json",
-        "authorization": authorization
-    }
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        response_dict = response.json()
-        status = response_dict.get('generations_by_pk', {}).get('status', '')
-        print(f"Current status for generation {generation_id}: {status}")
-        return status
-    return None
-
-
 def wait_for_image_generation(generation_id):
     """Wait for image generation to complete"""
     while True:
@@ -477,7 +540,37 @@ def wait_for_image_generation(generation_id):
             return False
         time.sleep(5)  # Wait before checking again
 
- 
 
+def check_dataset_status(dataset_id):
+    """检查数据集状态和图片数量"""
+    url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}"
+    
+    headers = {
+        "accept": "application/json",
+        "authorization": authorization
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        logger.info(f"Dataset status response: {response.text}")
+        
+        if response.status_code == 200:
+            dataset = response.json().get('datasets_by_pk', {})
+            image_count = len(dataset.get('dataset_images', []))
+            logger.info(f"Dataset {dataset_id} contains {image_count} images")
+            
+            # 检查每张图片的状态
+            for image in dataset.get('dataset_images', []):
+                logger.info(f"Image status: {json.dumps(image, indent=2)}")
+            
+            return {
+                'status': 'ready' if image_count > 0 else 'empty',
+                'image_count': image_count
+            }
+    except Exception as e:
+        logger.error(f"Error checking dataset status: {str(e)}")
+        return None
+
+ 
 
 

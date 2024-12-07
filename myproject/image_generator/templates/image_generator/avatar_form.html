@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container min-vh-100 py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Describe Your Character</h2>
+                    
+                    {% if messages %}
+                    <div class="messages mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="describe_user" class="form-label">Character Description</label>
+                            <textarea class="form-control" id="describe_user" name="describe_user" 
+                                    rows="4" required
+                                    placeholder="Example: a cheerful 8-year-old Asian girl with black pigtails, wearing a colorful dress"></textarea>
+                            <div class="form-text">
+                                Be specific about appearance, age, style, and personality traits.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-magic me-2"></i>Generate Avatars
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+textarea.form-control {
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+textarea.form-control:focus {
+    border-color: #2193b0;
+    box-shadow: 0 0 0 0.25rem rgba(33, 147, 176, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #2193b0, #6dd5ed);
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

@@ -1,87 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Generated Images</title>
-    <style>
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-        .image-container {
-            position: relative;
-            cursor: pointer;
-            border: 3px solid transparent;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .image-container.selected {
-            border-color: #4CAF50;
-        }
-        .image-container img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        .buttons {
-            text-align: center;
-            margin: 20px;
-        }
-        .confirm-button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .confirm-button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-<body>
-    <h1>Generated Images</h1>
-    <form action="{% url 'image_generator:select_image' generation_id=generation_id %}" method="post">
-        {% csrf_token %}
-        <div class="image-grid">
-            {% for image in images %}
-            <div class="image-container" onclick="selectImage(this, '{{ image.id }}')">
-                <img src="{{ image.url }}" alt="Generated Image">
-                <div style="display: none;">Image ID: {{ image.id }}</div>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">Choose Your Avatar</h2>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="row g-4">
+        {% for image in images %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card image-card h-100 border-0 shadow-sm">
+                <img src="{{ image.url }}" class="card-img-top" alt="Generated avatar">
+                <div class="card-body text-center">
+                    <form method="post" action="{% url 'image_generator:create_dataset' selected_image_id=image.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-check me-2"></i>Select This Avatar
+                        </button>
+                    </form>
+                </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
+    </div>
+</div>
 
-        <input type="hidden" name="image_id" id="selectedImage">
-        <div class="buttons">
-            <button type="submit" class="confirm-button" id="confirmButton" disabled>
-                Confirm Selection
-            </button>
-            <a href="{% url 'image_generator:home' %}" class="button">
-                Generate New Images
-            </a>
-        </div>
-    </form>
+<style>
+.image-card {
+    transition: transform 0.3s;
+    cursor: pointer;
+}
 
-    <script>
-        function selectImage(container, imageId) {
-            // Remove selection from all containers
-            document.querySelectorAll('.image-container').forEach(el => {
-                el.classList.remove('selected');
-            });
-            
-            // Add selection to clicked container
-            container.classList.add('selected');
-            
-            // Update hidden input
-            document.getElementById('selectedImage').value = imageId;
-            
-            // Enable confirm button
-            document.getElementById('confirmButton').disabled = false;
-        }
-    </script>
-</body>
-</html>
+.image-card:hover {
+    transform: translateY(-5px);
+}
+
+.image-card img {
+    border-radius: 10px 10px 0 0;
+    object-fit: cover;
+    height: 300px;
+}
+
+.btn-outline-primary {
+    border-color: #2193b0;
+    color: #2193b0;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(45deg, #2193b0, #6dd5ed);
+    border-color: transparent;
+}
+</style>
+{% endblock %}
