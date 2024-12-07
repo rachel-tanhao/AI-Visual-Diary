@@ -6,9 +6,9 @@ from . import views
 app_name = 'image_generator'
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('initial/', views.initial_user_flow, name='initial'),
-    path('generate-avatars/', views.avatar_generation_flow, name='generate_avatars'),
+    path('', views.initial_user_flow, name='initial'),
+    path('home/', views.home, name='home'),
+    path('generate-avatars/', views.generate_avatars, name='generate_avatars'),
     path('display/<str:generation_id>/', views.display_generated_images, name='display_generated_images'),
     
     # 数据集相关的路由
@@ -31,6 +31,7 @@ urlpatterns = [
     # 工具路由
     path('test-leonardo-api-key/', views.test_leonardo_api_key, name='test_leonardo_api_key'),
     path('logout/', views.logout_view, name='logout'),
+    path('display-diary-scenes/<str:dataset_id>/', views.display_diary_scenes, name='display_diary_scenes'),
 ]
 
 # urlpatterns = [

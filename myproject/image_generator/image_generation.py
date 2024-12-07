@@ -374,7 +374,7 @@ def train_custom_model(dataset_id, describe_user, max_retries=3):
         "instance_prompt": "pixar style character", 
         "nsfw": False,
         "resolution": 512,  # 降低分辨率
-        "sd_version": "v1_5"  # 尝试不同的 SD 版本
+        "sd_version": "v2_1"  # 尝试不同的 SD 版本
     }
     
     headers = {
@@ -559,14 +559,11 @@ def check_dataset_status(dataset_id):
             image_count = len(dataset.get('dataset_images', []))
             logger.info(f"Dataset {dataset_id} contains {image_count} images")
             
-            # 检查每张图片的状态
-            for image in dataset.get('dataset_images', []):
-                logger.info(f"Image status: {json.dumps(image, indent=2)}")
-            
             return {
                 'status': 'ready' if image_count > 0 else 'empty',
                 'image_count': image_count
             }
+        return None
     except Exception as e:
         logger.error(f"Error checking dataset status: {str(e)}")
         return None

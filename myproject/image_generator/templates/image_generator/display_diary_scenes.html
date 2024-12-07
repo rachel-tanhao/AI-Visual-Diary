@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Your Diary Scenes</h2>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        {% for item in scene_images %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <img src="{{ item.image_url }}" class="card-img-top" alt="Scene image">
+                <div class="card-body">
+                    <p class="card-text">{{ item.scene }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="{% url 'image_generator:upload_diary' %}" class="btn btn-primary">
+            Generate Another Diary
+        </a>
+    </div>
+</div>
+{% endblock %}

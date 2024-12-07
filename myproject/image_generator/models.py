@@ -6,6 +6,7 @@ Create models to store user data, generated images, and any relevant metadata.
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class UserDiary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)  # Make user optional
@@ -28,8 +29,9 @@ class GeneratedImage(models.Model):
 
 class UserProfile(models.Model):
     username = models.CharField(max_length=30, unique=True)
-    # Add other fields as needed, e.g., email, avatar, etc.
-
+    description = models.TextField(max_length=255, blank=True, null=True)  # 允许为空
+    created_at = models.DateTimeField(default=timezone.now)  # 使用默认值而不是 auto_now_add
+    
     def __str__(self):
         return self.username
 

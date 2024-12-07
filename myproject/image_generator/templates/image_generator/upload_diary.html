@@ -158,30 +158,58 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // 添加获取CSRF token的函数
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
     // Generate images
     generateImagesBtn.addEventListener('click', function() {
         const scenes = Array.from(document.querySelectorAll('#scenesList .list-group-item'))
             .map(item => item.textContent);
         
-        fetch('/generate-with-model/' + modelId + '/', {
+        console.log('Generating images for scenes:', scenes); // 添加调试日志
+        generateWithModel(modelId, scenes);
+    });
+
+    function generateWithModel(modelId, scenes) {
+        console.log('Making request with modelId:', modelId); // 添加调试日志
+        
+        fetch(`/generate-with-model/${modelId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                'X-CSRFToken': getCsrfToken()
             },
             body: JSON.stringify({
                 scenes: scenes
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response received:', response); // 添加调试日志
+            return response.json();
+        })
         .then(data => {
-            if (data.status === 'success') {
-                window.location.href = '/display/' + data.generation_id + '/';
+            console.log('Data received:', data); // 添加调试日志
+            if (data.status === 'success' && data.dataset_id) {
+                window.location.href = data.redirect_url;
             } else {
-                alert('Failed to generate images: ' + data.message);
+                showError('Failed to generate images');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Error generating images');
         });
-    });
+    }
+
+    // 添加错误显示函数
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mt-3';
+        errorDiv.textContent = message;
+        document.querySelector('.card-body').appendChild(errorDiv);
+    }
 });
 </script>
 {% endblock %}
