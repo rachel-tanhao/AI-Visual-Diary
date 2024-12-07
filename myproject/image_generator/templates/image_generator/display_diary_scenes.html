@@ -30,18 +30,33 @@
         </div>
     </div>
 
-    <!-- Images Grid -->
-    <div id="imagesGrid" class="row" style="display: none;">
-        {% for item in scene_images %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <img src="{{ item.image_url }}" class="card-img-top" alt="Scene image">
-                <div class="card-body">
-                    <p class="card-text">{{ item.scene }}</p>
+    <!-- Images Carousel -->
+    <div id="imagesGrid" style="display: none;">
+        <div id="scenesCarousel" class="carousel slide" data-bs-ride="false">
+            <div class="carousel-inner">
+                {% for item in scene_images %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <div class="card">
+                        <img src="{{ item.image_url }}" class="d-block w-100" alt="Scene image">
+                        <div class="card-body">
+                            <p class="card-text text-center">{{ item.scene }}</p>
+                            <div class="scene-counter text-center text-muted">
+                                Scene {{ forloop.counter }} of {{ scene_images|length }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#scenesCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#scenesCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
         </div>
-        {% endfor %}
     </div>
     
     <div class="text-center mt-4">
@@ -50,6 +65,63 @@
         </a>
     </div>
 </div>
+
+<style>
+.carousel {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-item img {
+    border-radius: 10px;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    max-height: none;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.card {
+    border: none;
+    background: transparent;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-text {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.scene-counter {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* 添加键盘导航提示 */
+.keyboard-nav-hint {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -89,19 +161,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     fetch(`/get-dataset-images/${datasetId}/`)
                         .then(response => response.json())
                         .then(data => {
-                            // 更新图片URL
-                            const imageGrid = document.getElementById('imagesGrid');
-                            const images = imageGrid.getElementsByTagName('img');
+                            const carousel = document.getElementById('scenesCarousel');
+                            const images = carousel.getElementsByTagName('img');
                             data.images.forEach((imageData, index) => {
                                 if (images[index]) {
                                     images[index].src = imageData.url;
                                 }
                             });
                             
-                            // 显示图片网格
                             setTimeout(() => {
                                 document.getElementById('progressSection').style.display = 'none';
-                                imageGrid.style.display = 'flex';
+                                document.getElementById('imagesGrid').style.display = 'block';
                             }, 1500);
                         });
                 } else {
@@ -117,6 +187,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Start progress monitoring
     updateProgress();
+
+    // 添加键盘导航
+    document.addEventListener('keydown', function(e) {
+        const carousel = document.getElementById('scenesCarousel');
+        if (carousel) {
+            if (e.key === 'ArrowLeft') {
+                carousel.querySelector('.carousel-control-prev').click();
+            } else if (e.key === 'ArrowRight') {
+                carousel.querySelector('.carousel-control-next').click();
+            }
+        }
+    });
 });
 </script>
 {% endblock %}
