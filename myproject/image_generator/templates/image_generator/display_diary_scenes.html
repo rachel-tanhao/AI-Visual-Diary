@@ -13,7 +13,25 @@
     </div>
     {% endif %}
     
-    <div class="row">
+    <!-- Progress Section -->
+    <div id="progressSection" class="mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Generation Progress</h5>
+                <div class="progress mb-3">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%" 
+                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+                <div id="statusText" class="text-muted">Initializing image generation...</div>
+                <div id="logMessages" class="mt-3" style="max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.9em;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Images Grid -->
+    <div id="imagesGrid" class="row" style="display: none;">
         {% for item in scene_images %}
         <div class="col-md-6 mb-4">
             <div class="card">
@@ -32,4 +50,71 @@
         </a>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const totalScenes = {{ scene_images|length }};
+    const datasetId = "{{ dataset_id }}";
+    let currentImages = 0;
+    let lastImageCount = 0;  // 用于跟踪新图片生成
+    
+    function updateProgress() {
+        fetch(`/check-dataset-progress/${datasetId}/`)
+            .then(response => response.json())
+            .then(data => {
+                currentImages = data.image_count;
+                const progress = Math.round((currentImages / totalScenes) * 100);
+                
+                // Update progress bar
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = `${progress}%`;
+                progressBar.setAttribute('aria-valuenow', progress);
+                progressBar.textContent = `${progress}%`;
+                
+                // Update status text
+                const statusText = document.getElementById('statusText');
+                statusText.textContent = `Generated ${currentImages} of ${totalScenes} images...`;
+                
+                // Only add log message if new images were generated
+                if (currentImages > lastImageCount) {
+                    const logMessages = document.getElementById('logMessages');
+                    logMessages.innerHTML += `<div>[${new Date().toLocaleTimeString()}] Generated image ${currentImages} of ${totalScenes}</div>`;
+                    logMessages.scrollTop = logMessages.scrollHeight;
+                    lastImageCount = currentImages;
+                }
+                
+                // Check if generation is complete
+                if (currentImages === totalScenes) {
+                    // 添加完成消息
+                    const logMessages = document.getElementById('logMessages');
+                    logMessages.innerHTML += `<div class="text-success">[${new Date().toLocaleTimeString()}] All images generated successfully!</div>`;
+                    
+                    // 延迟隐藏进度条和显示图片，给用户时间看到100%
+                    setTimeout(() => {
+                        document.getElementById('progressSection').style.display = 'none';
+                        document.getElementById('imagesGrid').style.display = 'flex';
+                    }, 1500);
+                } else {
+                    // Continue polling
+                    setTimeout(updateProgress, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking progress:', error);
+                const logMessages = document.getElementById('logMessages');
+                logMessages.innerHTML += `<div class="text-danger">[${new Date().toLocaleTimeString()}] Error: ${error.message}</div>`;
+                
+                // 继续尝试更新，即使发生错误
+                setTimeout(updateProgress, 5000);
+            });
+    }
+    
+    // 确保进度条显示，图片网格隐藏
+    document.getElementById('progressSection').style.display = 'block';
+    document.getElementById('imagesGrid').style.display = 'none';
+    
+    // Start progress monitoring
+    updateProgress();
+});
+</script>
 {% endblock %}

@@ -32,6 +32,7 @@ urlpatterns = [
     path('test-leonardo-api-key/', views.test_leonardo_api_key, name='test_leonardo_api_key'),
     path('logout/', views.logout_view, name='logout'),
     path('display-diary-scenes/<str:dataset_id>/', views.display_diary_scenes, name='display_diary_scenes'),
+    path('check-dataset-progress/<str:dataset_id>/', views.check_dataset_progress, name='check_dataset_progress'),
 ]
 
 # urlpatterns = [

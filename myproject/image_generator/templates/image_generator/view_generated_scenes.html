@@ -2,70 +2,75 @@
 {% load static %}
 
 {% block content %}
-<div class="container py-5">
-    <h2 class="text-center mb-5">Your Diary Visualized</h2>
-    
-    {% if messages %}
-    <div class="messages mb-4">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    
-    <div class="row g-4">
-        {% for scene, image in scenes|zip:images %}
-        <div class="col-md-6">
-            <div class="card scene-card h-100 border-0 shadow-sm">
-                <img src="{{ image.url }}" class="card-img-top" alt="Generated scene">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Generated Scenes</h3>
+                </div>
                 <div class="card-body">
-                    <p class="scene-description mb-0">{{ scene }}</p>
+                    <div id="scenesList" class="list-group mb-4">
+                        {% for scene in scenes %}
+                        <div class="list-group-item">
+                            {{ scene }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" id="generateImagesBtn" class="btn btn-primary btn-lg">
+                            Generate Images
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-        {% endfor %}
-    </div>
-    
-    <div class="text-center mt-5">
-        <a href="{% url 'image_generator:upload_diary' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Upload Another Diary
-        </a>
     </div>
 </div>
 
-<style>
-.scene-card {
-    transition: transform 0.3s;
+<script>
+const modelId = "{{ model_id }}";
+
+document.getElementById('generateImagesBtn').addEventListener('click', function() {
+    const scenes = Array.from(document.querySelectorAll('#scenesList .list-group-item'))
+        .map(item => item.textContent.trim());
+    
+    generateWithModel(modelId, scenes);
+});
+
+function generateWithModel(modelId, scenes) {
+    fetch(`/generate-with-model/${modelId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            scenes: scenes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' && data.dataset_id) {
+            window.location.href = data.redirect_url;
+        } else {
+            showError('Failed to generate images');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError('Error generating images');
+    });
 }
 
-.scene-card:hover {
-    transform: translateY(-5px);
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger mt-3';
+    errorDiv.textContent = message;
+    document.querySelector('.card-body').appendChild(errorDiv);
 }
-
-.scene-card img {
-    border-radius: 10px 10px 0 0;
-    object-fit: cover;
-    height: 400px;
-}
-
-.scene-description {
-    font-size: 1.1rem;
-    color: #495057;
-}
-
-.btn-primary {
-    background: linear-gradient(45deg, #2193b0, #6dd5ed);
-    border: none;
-    padding: 10px 30px;
-    transition: all 0.3s;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-</style>
+</script>
 {% endblock %}
+`
+</``rewritten_file>

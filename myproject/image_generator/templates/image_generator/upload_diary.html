@@ -3,82 +3,55 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Your Visual Diary</h3>
+    <h1 class="text-center mb-4">Your Visual Diary</h1>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Upload Form -->
+    <form id="uploadForm" method="post" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="diary_image" class="form-label">Upload Your Diary Page</label>
+            <input type="file" class="form-control" id="diary_image" name="diary_image" accept="image/*">
+        </div>
+    </form>
+
+    <!-- Content Container -->
+    <div class="content-container" style="display: none; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div class="row">
+            <!-- Left: Image Preview -->
+            <div class="col-md-6">
+                <div class="image-container">
+                    <h2>Original Image</h2>
+                    <img id="preview" class="img-fluid rounded" alt="Preview" style="max-height: 600px; object-fit: contain;">
                 </div>
-                <div class="card-body">
-                    {% if messages %}
-                    <div class="messages mb-4">
-                        {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
+            </div>
 
-                    <!-- Step 1: Upload Image -->
-                    <form id="uploadForm" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="diary_image" class="form-label">Upload Your Diary Page</label>
-                            <input type="file" class="form-control" id="diary_image" name="diary_image" accept="image/*">
-                        </div>
-                        
-                        <div id="imagePreview" class="mb-3" style="display: none;">
-                            <img id="preview" class="img-fluid rounded" alt="Preview">
-                        </div>
-                        
-                        <button type="button" id="extractTextBtn" class="btn btn-primary" style="display: none;">
-                            Extract Text
-                        </button>
-                    </form>
-
-                    <!-- Step 2: Display Extracted Text -->
-                    <div id="extractedTextSection" class="mt-4" style="display: none;">
-                        <h5>Extracted Text:</h5>
-                        <div class="card">
-                            <div class="card-body">
-                                <p id="extractedText"></p>
-                            </div>
-                        </div>
-                        <button type="button" id="generateScenesBtn" class="btn btn-success mt-3">
-                            Generate Scenes
-                        </button>
+            <!-- Right: Extracted Text -->
+            <div class="col-md-6">
+                <div class="text-container">
+                    <h2>Extracted Text</h2>
+                    <div id="extractedText" class="extracted-text" style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; white-space: pre-wrap; overflow-y: auto; max-height: 600px;">
                     </div>
-
-                    <!-- Step 3: Display Generated Scenes -->
-                    <div id="scenesSection" class="mt-4" style="display: none;">
-                        <h5>Generated Scenes:</h5>
-                        <div id="scenesList" class="list-group mb-3">
-                        </div>
-                        <button type="button" id="generateImagesBtn" class="btn btn-primary">
-                            Generate Images
-                        </button>
-                    </div>
-
-                    <!-- Step 4: Display Generated Images -->
-                    {% if images %}
-                    <div class="mt-4">
-                        <h5>Your Visual Diary:</h5>
-                        <div class="row">
-                            {% for image in images %}
-                            <div class="col-md-6 mb-4">
-                                <div class="card">
-                                    <img src="{{ image.url }}" class="card-img-top" alt="Generated scene">
-                                    <div class="card-body">
-                                        <p class="card-text">{{ image.scene }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions text-center mt-4">
+        <button type="button" id="extractTextBtn" class="btn btn-primary btn-lg me-3" style="display: none;">
+            Extract Text
+        </button>
+        <button type="button" id="generateScenesBtn" class="btn btn-success btn-lg" style="display: none;">
+            Generate Scenes
+        </button>
     </div>
 </div>
 
@@ -90,13 +63,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('diary_image');
-    const imagePreview = document.getElementById('imagePreview');
+    const contentContainer = document.querySelector('.content-container');
     const preview = document.getElementById('preview');
     const extractTextBtn = document.getElementById('extractTextBtn');
-    const extractedTextSection = document.getElementById('extractedTextSection');
     const generateScenesBtn = document.getElementById('generateScenesBtn');
-    const scenesSection = document.getElementById('scenesSection');
-    const generateImagesBtn = document.getElementById('generateImagesBtn');
 
     // Image upload preview
     imageInput.addEventListener('change', function(e) {
@@ -104,8 +74,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const reader = new FileReader();
             reader.onload = function(e) {
                 preview.src = e.target.result;
-                imagePreview.style.display = 'block';
-                extractTextBtn.style.display = 'block';
+                contentContainer.style.display = 'block';
+                extractTextBtn.style.display = 'inline-block';
             }
             reader.readAsDataURL(e.target.files[0]);
         }
@@ -126,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             document.getElementById('extractedText').textContent = data.text;
-            extractedTextSection.style.display = 'block';
+            generateScenesBtn.style.display = 'inline-block';
         });
     });
 
@@ -146,70 +116,17 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            const scenesList = document.getElementById('scenesList');
-            scenesList.innerHTML = '';
-            data.scenes.forEach(scene => {
-                const div = document.createElement('div');
-                div.className = 'list-group-item';
-                div.textContent = scene;
-                scenesList.appendChild(div);
-            });
-            scenesSection.style.display = 'block';
-        });
-    });
-
-    // 添加获取CSRF token的函数
-    function getCsrfToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
-    }
-
-    // Generate images
-    generateImagesBtn.addEventListener('click', function() {
-        const scenes = Array.from(document.querySelectorAll('#scenesList .list-group-item'))
-            .map(item => item.textContent);
-        
-        console.log('Generating images for scenes:', scenes); // 添加调试日志
-        generateWithModel(modelId, scenes);
-    });
-
-    function generateWithModel(modelId, scenes) {
-        console.log('Making request with modelId:', modelId); // 添加调试日志
-        
-        fetch(`/generate-with-model/${modelId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken()
-            },
-            body: JSON.stringify({
-                scenes: scenes
-            })
-        })
-        .then(response => {
-            console.log('Response received:', response); // 添加调试日志
-            return response.json();
-        })
-        .then(data => {
-            console.log('Data received:', data); // 添加调试日志
-            if (data.status === 'success' && data.dataset_id) {
+            if (data.status === 'success' && data.redirect_url) {
                 window.location.href = data.redirect_url;
             } else {
-                showError('Failed to generate images');
+                showError(data.message || 'Failed to generate scenes');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showError('Error generating images');
+            showError('Error generating scenes');
         });
-    }
-
-    // 添加错误显示函数
-    function showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'alert alert-danger mt-3';
-        errorDiv.textContent = message;
-        document.querySelector('.card-body').appendChild(errorDiv);
-    }
+    });
 });
 </script>
 {% endblock %}

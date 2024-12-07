@@ -191,60 +191,6 @@ def get_generated_image_ids(generation_id):
     return image_ids
 
 
-# def create_user_dataset(dataset_name, seed_image_id, describe_user):
-#     """Create a dataset with multiple activity images."""
-#     logger.info(f"Starting dataset creation with name: {dataset_name}")
-    
-#     dataset_id = create_dataset(dataset_name)
-#     if not dataset_id:
-#         logger.error("Failed to create dataset")
-#         return None
-        
-#     logger.info(f"Dataset created successfully with ID: {dataset_id}")
-    
-#     activities = [
-#         "playing basketball", "riding a bicycle", "reading a book",
-#         "playing the piano", "cooking in the kitchen", "flying a kite",
-#         "playing tennis", "swimming in a pool", "watering flowers"
-#     ]
-    
-#     generated_images = []
-#     for activity in activities:
-#         logger.info(f"Generating image for activity: {activity}")
-#         prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation, bright color."
-        
-#         generation_id = generate_with_image_id(seed_image_id, prompt, 1)
-#         if generation_id:
-#             logger.info(f"Generation started with ID: {generation_id}")
-            
-#             # Wait for generation to complete
-#             generation_response = wait_for_image_generation(generation_id)
-#             if generation_response:
-#                 image_ids = get_generated_image_ids(generation_id)
-#                 for image_id in image_ids:
-#                     if upload_image_to_dataset(dataset_id, image_id):
-#                         logger.info(f"Successfully uploaded image {image_id} for activity: {activity}")
-#                         generated_images.append({
-#                             'activity': activity,
-#                             'image_id': image_id
-#                         })
-#                     else:
-#                         logger.error(f"Failed to upload image {image_id} to dataset")
-#             else:
-#                 logger.error(f"Generation failed for activity: {activity}")
-#         else:
-#             logger.error(f"Failed to start generation for activity: {activity}")
-            
-#         # Get current count of images
-#         current_count = get_number_of_images_in_dataset(dataset_id)
-#         logger.info(f"Current number of images in dataset: {current_count}")
-    
-#     return {
-#         'dataset_id': dataset_id,
-#         'images': generated_images,
-#         'total_images': len(generated_images)
-#     }
-
 
 def upload_image_to_dataset(dataset_id, image_id):
     """将生成的图片上传到数据集
@@ -368,13 +314,11 @@ def train_custom_model(dataset_id, describe_user, max_retries=3):
     
     payload = {
         "name": model_name,
-        "description": "Custom character model",
+        "description": describe_user,
         "datasetId": dataset_id,
-        "modelType": "CHARACTERS",
-        "instance_prompt": "pixar style character", 
+        "modelType": "GENERAL",
+        "instance_prompt": "a pixar style character", 
         "nsfw": False,
-        "resolution": 512,  # 降低分辨率
-        "sd_version": "v2_1"  # 尝试不同的 SD 版本
     }
     
     headers = {
@@ -477,10 +421,13 @@ def generate_with_custom_model(model_id, prompt, num_images=1):
     }
     
     try:
+        logger.info(f"Generating image with prompt: {prompt}")  # 添加日志
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code == 200:
             generation_id = response.json().get('sdGenerationJob', {}).get('generationId')
+            logger.info(f"Successfully generated image with ID: {generation_id}")
             return generation_id
+        logger.error(f"Failed to generate image. Status code: {response.status_code}")
         return None
     except Exception as e:
         logger.error(f"Error generating with custom model: {str(e)}")
@@ -542,7 +489,7 @@ def wait_for_image_generation(generation_id):
 
 
 def check_dataset_status(dataset_id):
-    """检查数据集状态和图片数量"""
+    """检查数据集状态"""
     url = f"https://cloud.leonardo.ai/api/rest/v1/datasets/{dataset_id}"
     
     headers = {
@@ -552,22 +499,18 @@ def check_dataset_status(dataset_id):
     
     try:
         response = requests.get(url, headers=headers)
-        logger.info(f"Dataset status response: {response.text}")
+        response_data = response.json()
+        logger.info(f"Dataset status response: {json.dumps(response_data)}")
         
-        if response.status_code == 200:
-            dataset = response.json().get('datasets_by_pk', {})
+        if response.status_code == 200 and 'datasets_by_pk' in response_data:
+            dataset = response_data['datasets_by_pk']
             image_count = len(dataset.get('dataset_images', []))
             logger.info(f"Dataset {dataset_id} contains {image_count} images")
-            
             return {
-                'status': 'ready' if image_count > 0 else 'empty',
+                'status': 'ready',
                 'image_count': image_count
             }
-        return None
     except Exception as e:
         logger.error(f"Error checking dataset status: {str(e)}")
-        return None
-
- 
-
+    return None
 

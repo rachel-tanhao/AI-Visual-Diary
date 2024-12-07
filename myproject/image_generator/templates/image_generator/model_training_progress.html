@@ -41,7 +41,7 @@ function checkTrainingStatus() {
         } else if (data.status === 'COMPLETE') {
             window.location.href = `/trained-model/${modelId}/`;
         } else {
-            alert('模型训练失败，请重试');
+            alert('Model training failed, please try again');
             window.location.href = "{% url 'image_generator:home' %}";
         }
     });

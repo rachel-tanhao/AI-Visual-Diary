@@ -144,57 +144,6 @@ def test_leonardo_api_key(request):
 #     return render(request, 'image_generator/generate_avatars.html', {'form': form})
 
 
-def create_dataset_flow(request):
-    """Handle dataset creation and model training"""
-    if request.method == 'POST':
-        selected_image_id = request.POST.get('selected_image_id')
-        username = request.session.get('username')
-        describe_user = request.session.get('describe_user')
-        
-        if not all([selected_image_id, username, describe_user]):
-            messages.error(request, "Missing required information")
-            return redirect('image_generator:generate_avatars')
-        
-        try:
-            # 创建数据集并生成训练图片
-            dataset_id = create_dataset(f"dataset_{username}")
-            
-            # 预定义的场景列表
-            activities = [
-                "playing basketball",
-                "reading a book",
-                "walking in a park",
-                "cooking in kitchen",
-                "painting on canvas"
-            ]
-            
-            for activity in activities:
-                generation_id = generate_with_image_id(
-                    selected_image_id,
-                    f"{describe_user} {activity}",
-                    1
-                )
-                if generation_id:
-                    images = display_images(generation_id)
-                    for image in images:
-                        upload_image_to_dataset(dataset_id, image['id'])
-            
-            # 开始训练模型
-            training_info = train_custom_model(dataset_id, describe_user)
-            if training_info:
-                UserCustomModel.objects.create(
-                    username=username,
-                    model_id=training_info['model_id'],
-                    model_status='TRAINING'
-                )
-                messages.success(request, "Model training started! Please check back later.")
-                return redirect('image_generator:initial')
-                
-        except Exception as e:
-            logger.error(f"Error in dataset creation: {str(e)}")
-            messages.error(request, "Failed to create dataset and train model")
-    
-    return redirect('image_generator:generate_avatars')
 
 
 def diary_processing_flow(request):
@@ -391,7 +340,7 @@ def select_image(request, generation_id):
 def create_user_dataset_view(request, selected_image_id):
     """初始化数据集创建过程"""
     if request.method == 'POST':
-        # 获取用户描述
+        # 获取用描述
         describe_user = request.session.get('describe_user', '')
         dataset_name = f"user_dataset_{selected_image_id[:8]}"
         
@@ -419,15 +368,16 @@ def create_user_dataset_view(request, selected_image_id):
     
     return redirect('image_generator:home')
 
+
+
 def create_dataset_background(session_key, dataset_name, seed_image_id, describe_user):
-    """后台任务：创建数据集并生成训练图片"""
+    """Background task to create dataset and update progress"""
     from django.contrib.sessions.backends.db import SessionStore
     session = SessionStore(session_key=session_key)
     
     logger.info(f"Starting dataset creation with description: {describe_user}")
     
     try:
-        # 创建数据集
         dataset_id = create_dataset(dataset_name)
         logger.info(f"Dataset created with ID: {dataset_id}")
         
@@ -439,8 +389,8 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
             })
             session.save()
             return
-        
-        # 更新进度信息
+            
+        # Initialize or update the progress dictionary
         progress_data = session.get('dataset_progress', {})
         progress_data.update({
             'dataset_id': dataset_id,
@@ -453,7 +403,6 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
         session['dataset_progress'] = progress_data
         session.save()
         
-        # 预定义活动列表
         activities = [
             "playing basketball", "riding a bicycle", "reading a book",
             "playing the piano", "cooking in the kitchen", "flying a kite",
@@ -463,24 +412,50 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
         for idx, activity in enumerate(activities):
             try:
                 prompt = f"Highly detailed 3D Disney Pixar-style animation of a {describe_user}, {activity}. Disney, Pixar art style, CGI, high details, 3d animation."
+                logger.info(f"Activity {idx + 1}/{len(activities)}: {activity}")
+                logger.info(f"Full prompt: {prompt}")
+                
+                progress_data = session.get('dataset_progress', {})
+                progress_data.update({
+                    'current_activity': activity,
+                    'completed_activities': idx,
+                    'logs': progress_data.get('logs', []) + [
+                        f"Starting generation for: {activity}",
+                        f"Using prompt: {prompt}"
+                    ]
+                })
+                session['dataset_progress'] = progress_data
+                session.save()
+                
+                # Generate image for activity
                 generation_id = generate_with_image_id(seed_image_id, prompt, 1)
                 
                 if generation_id:
-                    # 等待生成完成
+                    logger.info(f"Generation started for {activity} with ID: {generation_id}")
+                    session['dataset_progress']['logs'].append(f"Generation started for {activity} (ID: {generation_id})")
+                    session.save()
+                    
+                    # Wait for generation
                     while True:
                         status = check_generation_status(generation_id)
                         if status == 'COMPLETE':
                             break
                         time.sleep(2)
                     
-                    # 获取生成的图片ID并上传到数据集
+                    # Upload to dataset
                     image_ids = get_generated_image_ids(generation_id)
                     for image_id in image_ids:
-                        success = upload_image_to_dataset(dataset_id, image_id)
-                        if success:
-                            logger.info(f"Successfully uploaded image {image_id} for activity: {activity}")
-                        else:
-                            logger.error(f"Failed to upload image {image_id} for activity: {activity}")
+                        upload_success = upload_image_to_dataset(dataset_id, image_id)
+                    
+                    session['dataset_progress'].update({
+                        'completed_activities': idx + 1,
+                        'logs': session['dataset_progress']['logs'] + [f"Completed: {activity}"]
+                    })
+                    session.save()
+                else:
+                    logger.info(f"Failed to generate image for {activity}")
+                    session['dataset_progress']['logs'].append(f"Failed to generate image for {activity}")
+                    session.save()
                 
             except Exception as e:
                 logger.error(f"Error processing activity {activity}: {str(e)}")
@@ -491,25 +466,12 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
                 })
                 session['dataset_progress'] = progress_data
                 session.save()
-        
-        # 数据集创建完成，开始训练模型
-        session['dataset_progress'].update({
-            'status': 'complete',
-            'logs': session['dataset_progress'].get('logs', []) + ["Dataset creation completed"]
-        })
+                
+        session['dataset_progress']['status'] = 'complete'
+        session['dataset_progress']['logs'].append("Dataset creation completed")
         session.save()
-        
-        # 开始训练模型
-        training_info = train_custom_model(dataset_id, describe_user)
-        if training_info:
-            UserCustomModel.objects.create(
-                username=session.get('username', 'anonymous'),
-                model_id=training_info['model_id'],
-                model_status='TRAINING'
-            )
-            session['dataset_progress']['logs'].append(f"Model training started with ID: {training_info['model_id']}")
-            session.save()
-            
+        logger.info("Dataset creation completed successfully")
+
     except Exception as e:
         logger.error(f"Critical error in background task: {str(e)}")
         progress_data = session.get('dataset_progress', {})
@@ -518,8 +480,7 @@ def create_dataset_background(session_key, dataset_name, seed_image_id, describe
             'logs': progress_data.get('logs', []) + [f"Critical error: {str(e)}"]
         })
         session['dataset_progress'] = progress_data
-        session.save()
-        
+        session.save()     
 
 
 def display_generated_images(request, generation_id):
@@ -713,11 +674,12 @@ def dataset_complete(request, dataset_id):
 def generate_with_model(request, model_id):
     """Generate images using trained model"""
     try:
-        logger.info(f"Received request to generate images with model_id: {model_id}")  # 添加调试日志
+        logger.info(f"Received request to generate images with model_id: {model_id}")
         data = json.loads(request.body)
         scenes = data.get('scenes', [])
         
-        logger.info(f"Received scenes: {scenes}")  # 添加调试日志
+        describe_user = request.session.get('describe_user', '')
+        logger.info(f"Retrieved describe_user from session: {describe_user}")
         
         if not scenes:
             return JsonResponse({
@@ -728,86 +690,47 @@ def generate_with_model(request, model_id):
         # 创建新的数据集
         dataset_name = f"diary_dataset_{int(time.time())}"
         dataset_id = create_dataset(dataset_name)
-        logger.info(f"Created dataset with ID: {dataset_id}")  # 添加调试日志
+        logger.info(f"Created dataset with ID: {dataset_id}")
         
         if not dataset_id:
             return JsonResponse({
                 'status': 'error',
                 'message': 'Failed to create dataset'
             })
-            
-        # 存储dataset_id到session以供续使用
-        request.session['current_diary_dataset_id'] = dataset_id
         
-        # 为每个场景生成图片
-        generation_ids = []
-        for scene in scenes:
-            generation_id = generate_with_custom_model(model_id, scene)
-            if generation_id:
-                generation_ids.append(generation_id)
-                # 等待生成完成
-                while True:
-                    status = check_generation_status(generation_id)
-                    if status == 'COMPLETE':
-                        # 获取生成的图片ID并上传到数据集
-                        image_ids = get_generated_image_ids(generation_id)
-                        for image_id in image_ids:
-                            success = upload_image_to_dataset(dataset_id, image_id)
-                            if not success:
-                                logger.error(f"Failed to upload image {image_id} to dataset")
-                        break
-                    elif status == 'FAILED':
-                        logger.error(f"Generation failed for scene: {scene}")
-                        break
-                    time.sleep(2)
-            else:
-                logger.error(f"Failed to generate image for scene: {scene}")
-        
-        # 检查数据集状态
-        dataset_status = check_dataset_status(dataset_id)
-        if dataset_status and dataset_status['status'] == 'ready':
-            redirect_url = reverse('image_generator:display_diary_scenes', kwargs={'dataset_id': dataset_id})
-            logger.info(f"Redirecting to: {redirect_url}")  # 添加日志
-            return JsonResponse({
-                'status': 'success',
-                'dataset_id': dataset_id,
-                'redirect_url': redirect_url
-            })
+        # 启动后台线程生成图片
+        thread = threading.Thread(
+            target=generate_images_background,
+            args=(scenes, dataset_id, describe_user, model_id)  # 添加 model_id
+        )
+        thread.start()
         
         return JsonResponse({
-            'status': 'error',
-            'message': 'Failed to generate or upload images'
+            'status': 'success',
+            'dataset_id': dataset_id,
+            'redirect_url': reverse('image_generator:display_diary_scenes', kwargs={'dataset_id': dataset_id})
         })
         
     except Exception as e:
-        logger.error(f"Error generating images: {str(e)}")
+        logger.error(f"Error in generate_with_model: {str(e)}")
         return JsonResponse({
             'status': 'error',
             'message': str(e)
-        })
+        }, status=500)
 
 def display_diary_scenes(request, dataset_id):
-    """Display generated scenes from diary"""
+    """Display generated diary scenes with progress tracking"""
     try:
         # 获取场景列表
-        scenes = request.session.get('scene_list', [])
+        scenes = request.session.get('generated_scenes', [])
         
-        # 获取数据集中的所有图片
-        images = display_all_images_in_dataset(dataset_id)
-        logger.info(f"Retrieved {len(images)} images from dataset {dataset_id}")
-        
-        if not images:
-            messages.error(request, "No images found in dataset")
-            return redirect('image_generator:upload_diary')
-            
-        # 将场景和图片配对
+        # 准备场景和图片的映射
         scene_images = []
-        for scene, image in zip(scenes, images):
-            if image and image.get('url'):
-                scene_images.append({
-                    'scene': scene,
-                    'image_url': image['url']
-                })
+        for scene in scenes:
+            scene_images.append({
+                'scene': scene,
+                'image_url': ''  # 图片URL将通过JavaScript动态更新
+            })
         
         return render(request, 'image_generator/display_diary_scenes.html', {
             'scene_images': scene_images,
@@ -816,22 +739,54 @@ def display_diary_scenes(request, dataset_id):
         
     except Exception as e:
         logger.error(f"Error displaying diary scenes: {str(e)}")
-        messages.error(request, "Error displaying generated scenes")
+        messages.error(request, 'Error displaying scenes')
         return redirect('image_generator:upload_diary')
 
+def generate_images_background(scenes, dataset_id, describe_user, model_id):
+    """Background task to generate images"""
+    try:
+        logger.info(f"Starting background generation for {len(scenes)} scenes")
+        for scene in scenes:
+            try:
+                # 生成完整提示词
+                full_prompt = f"Highly detailed 3D Disney Pixar-style animation of {describe_user}, {scene}. Disney, Pixar art style, CGI, high details, 3d animation."
+                
+                # 生成图片
+                generation_id = generate_with_custom_model(model_id, full_prompt)
+                logger.info(f"Generated image with ID: {generation_id} for scene: {scene}")
+                
+                if generation_id:
+                    # 等待生成完成
+                    while True:
+                        status = check_generation_status(generation_id)
+                        if status == 'COMPLETE':
+                            break
+                        time.sleep(2)
+                    
+                    # 获取生成的图片ID并上传到数据集
+                    image_ids = get_generated_image_ids(generation_id)
+                    for image_id in image_ids:
+                        upload_success = upload_image_to_dataset(dataset_id, image_id)
+                        logger.info(f"Uploaded image {image_id} to dataset {dataset_id}: {upload_success}")
+                
+            except Exception as e:
+                logger.error(f"Error generating scene '{scene}': {str(e)}")
+                
+    except Exception as e:
+        logger.error(f"Critical error in background generation: {str(e)}")
 
 def view_generated_scenes(request):
-    """Display generated scenes from diary text"""
-    scene_list = request.session.get('scene_list', [])
-    generated_images = request.session.get('generated_images', [])
+    """Display generated scenes"""
+    scenes = request.session.get('generated_scenes', [])
+    model_id = request.session.get('model_id')
     
-    if not scene_list or not generated_images:
-        messages.warning(request, "No generated scenes found. Please process your diary first.")
+    if not scenes:
+        messages.warning(request, 'No generated scenes found. Please process your diary first.')
         return redirect('image_generator:upload_diary')
-    
+        
     return render(request, 'image_generator/view_generated_scenes.html', {
-        'scenes': scene_list,
-        'images': generated_images
+        'scenes': scenes,
+        'model_id': model_id
     })
 
 
@@ -916,11 +871,12 @@ def generate_scenes_view(request):
         logger.info(f"Generated {len(scenes)} scenes from diary text")
         
         # Store scenes in session for later use
-        request.session['scene_list'] = scenes
+        request.session['generated_scenes'] = scenes
         
         return JsonResponse({
             'status': 'success',
-            'scenes': scenes
+            'scenes': scenes,
+            'redirect_url': reverse('image_generator:view_generated_scenes')
         })
         
     except Exception as e:
@@ -937,6 +893,26 @@ def logout_view(request):
         request.session.flush()
         messages.success(request, "You have been logged out successfully!")
     return redirect('image_generator:initial')
+
+def check_dataset_progress(request, dataset_id):
+    """检查数据集中的图片生成进度"""
+    try:
+        status = check_dataset_status(dataset_id)
+        if status:
+            return JsonResponse({
+                'status': 'success',
+                'image_count': status['image_count']
+            })
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Failed to check dataset status'
+        }, status=500)
+    except Exception as e:
+        logger.error(f"Error checking dataset progress: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
 
 
 
